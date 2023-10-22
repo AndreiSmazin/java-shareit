@@ -40,7 +40,7 @@ public class ErrorHandlingControllerAdvice {
     @ExceptionHandler(DuplicateEmailException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     @ResponseBody
-    public Violation onDuplicateEmailException(DuplicateEmailException e){
+    public Violation onDuplicateEmailException(DuplicateEmailException e) {
         log.error("Validation error: incorrect email, {}", e.getMessage());
 
         return new Violation("email", e.getMessage());
@@ -49,9 +49,18 @@ public class ErrorHandlingControllerAdvice {
     @ExceptionHandler(IdNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
-    public String onIdNotFoundException(IdNotFoundException e){
+    public String onIdNotFoundException(IdNotFoundException e) {
         log.error("IdNotFoundException: {}", e.getMessage());
 
         return e.getMessage();
+    }
+
+    @ExceptionHandler(AccessNotAllowedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseBody
+    public String onAccessNotAllowedException(AccessNotAllowedException e) {
+        log.error("AccessNotAllowedException: {}", e.getMessage());
+
+        return  e.getMessage();
     }
 }

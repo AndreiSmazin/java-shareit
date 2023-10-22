@@ -1,14 +1,14 @@
 package ru.practicum.shareit.user;
 
-import ru.practicum.shareit.user.dto.UserRequestCreateDto;
+import ru.practicum.shareit.user.dto.UserForRequestCreateDto;
 
 public class UserMapper {
 
-    public static User toUser(UserRequestCreateDto userRequestCreateDto) {
+    public static User toUser(UserForRequestCreateDto userDto) {
         return User.builder()
                 .id(0)
-                .name(userRequestCreateDto.getName())
-                .email(userRequestCreateDto.getEmail())
+                .name(userDto.getName())
+                .email(userDto.getEmail())
                 .build();
     }
 }

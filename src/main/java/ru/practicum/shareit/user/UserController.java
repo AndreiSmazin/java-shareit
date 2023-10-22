@@ -3,8 +3,8 @@ package ru.practicum.shareit.user;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.user.dto.UserRequestCreateDto;
-import ru.practicum.shareit.user.dto.UserRequestUpdateDto;
+import ru.practicum.shareit.user.dto.UserForRequestCreateDto;
+import ru.practicum.shareit.user.dto.UserForRequestUpdateDto;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -27,14 +27,14 @@ public class UserController {
     }
 
     @PostMapping
-    public User create(@Valid @RequestBody UserRequestCreateDto userDto) {
+    public User create(@Valid @RequestBody UserForRequestCreateDto userDto) {
         log.info("Received POST-request /users with body: {}", userDto);
 
         return userService.createNewUser(userDto);
     }
 
     @PatchMapping("/{id}")
-    public User update(@Valid @PathVariable long id, @RequestBody UserRequestUpdateDto userDto) {
+    public User update(@PathVariable long id, @Valid @RequestBody UserForRequestUpdateDto userDto) {
         log.info("Received PATCH-request /users/{} with body: {}", id, userDto);
 
         return userService.updateUser(id, userDto);

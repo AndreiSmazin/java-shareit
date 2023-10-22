@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.DuplicateEmailException;
 import ru.practicum.shareit.exception.IdNotFoundException;
-import ru.practicum.shareit.user.dto.UserRequestCreateDto;
-import ru.practicum.shareit.user.dto.UserRequestUpdateDto;
+import ru.practicum.shareit.user.dto.UserForRequestCreateDto;
+import ru.practicum.shareit.user.dto.UserForRequestUpdateDto;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,30 +25,30 @@ public class UserService {
         return userDao.findAll();
     }
 
-    public User createNewUser(UserRequestCreateDto userDto) {
+    public User createNewUser(UserForRequestCreateDto userDto) {
         log.debug("+ createNewUser: {}", userDto);
 
         validateEmail(userDto.getEmail());
-        User newUser = UserMapper.toUser(userDto);
+        User user = UserMapper.toUser(userDto);
 
-        return userDao.create(newUser);
+        return userDao.create(user);
     }
 
-    public User updateUser(long id, UserRequestUpdateDto userDto) {
+    public User updateUser(long id, UserForRequestUpdateDto userDto) {
         log.debug("+ updateUser: {}, {}", id, userDto);
 
-        User user = userDao.find(id).orElseThrow(() -> new IdNotFoundException("User with this id not exist"));
+        User targetUser = findUser(id);
         if (userDto.getName() != null) {
-            user.setName(userDto.getName());
+            targetUser.setName(userDto.getName());
         }
         String newEmail = userDto.getEmail();
-        if (newEmail != null && !newEmail.equals(user.getEmail())) {
+        if (newEmail != null && !newEmail.equals(targetUser.getEmail())) {
             validateEmail(newEmail);
-            user.setEmail(newEmail);
+            targetUser.setEmail(newEmail);
         }
-        userDao.update(user);
+        userDao.update(targetUser);
 
-        return user;
+        return targetUser;
     }
 
     public void deleteUser(long id) {

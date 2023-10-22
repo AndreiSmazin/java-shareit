@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 
 @Builder
 @Data
-public class UserRequestCreateDto {
+public class UserForRequestCreateDto {
     @NotBlank
     private String name;
     @NotNull
