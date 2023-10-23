@@ -1,10 +1,7 @@
 package ru.practicum.shareit.exception;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -17,14 +14,6 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 @Slf4j
 public class ErrorHandlingControllerAdvice {
-    @Getter
-    @AllArgsConstructor
-    public class Violation{
-        private final String fieldName;
-        private final String massage;
-    }
-
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
@@ -49,18 +38,18 @@ public class ErrorHandlingControllerAdvice {
     @ExceptionHandler(IdNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
-    public String onIdNotFoundException(IdNotFoundException e) {
+    public Violation onIdNotFoundException(IdNotFoundException e) {
         log.error("IdNotFoundException: {}", e.getMessage());
 
-        return e.getMessage();
+        return new Violation("id", e.getMessage());
     }
 
     @ExceptionHandler(AccessNotAllowedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ResponseBody
-    public String onAccessNotAllowedException(AccessNotAllowedException e) {
+    public Violation onAccessNotAllowedException(AccessNotAllowedException e) {
         log.error("AccessNotAllowedException: {}", e.getMessage());
 
-        return  e.getMessage();
+        return new Violation("userId", e.getMessage());
     }
 }
