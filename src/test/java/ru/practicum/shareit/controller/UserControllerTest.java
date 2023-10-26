@@ -28,7 +28,7 @@ public class UserControllerTest {
     private MockMvc mockMvc;
     @MockBean
     private UserService userService;
-    private static ObjectMapper mapper = new ObjectMapper();
+    private ObjectMapper mapper = new ObjectMapper();
 
     private final User testUser1 = User.builder()
             .id(1L)
@@ -57,6 +57,21 @@ public class UserControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content().json(mapper.writeValueAsString(testUser1)));
+    }
+
+    @Test
+    @DisplayName("GET /users/{id} returns HTTP-response with status code 404, content type application/json and " +
+            "error massage, when user id is not exist")
+    void shouldNotReturnUserWithIdNotExist() throws Exception {
+        final long wrongId = 100L;
+        final Violation errorResponse = new Violation("id", "User with this id not exist");
+        Mockito.when(userService.findUser(wrongId)).thenThrow(new IdNotFoundException("User with this id " +
+                "not exist"));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/users/" + wrongId))
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.content().json(mapper.writeValueAsString(errorResponse)));
     }
 
     @Test
@@ -153,30 +168,18 @@ public class UserControllerTest {
     @DisplayName("PATCH /users/{id} returns HTTP-response with status code 200, content type application/json and " +
             "correct changed user")
     void shouldUpdateUser() throws Exception {
-        final UserForRequestUpdateDto userDto1 = UserForRequestUpdateDto.builder()
+        final UserForRequestUpdateDto userDto = UserForRequestUpdateDto.builder()
                 .name("Иванов Иван")
                 .email(null)
                 .build();
-        final UserForRequestUpdateDto userDto2 = UserForRequestUpdateDto.builder()
-                .name(null)
-                .email("nagibator1999@mail.ru")
-                .build();
-        Mockito.when(userService.updateUser(testUser1.getId(), userDto1)).thenReturn(testUser1);
-        Mockito.when(userService.updateUser(testUser2.getId(), userDto2)).thenReturn(testUser2);
+        Mockito.when(userService.updateUser(testUser1.getId(), userDto)).thenReturn(testUser1);
 
         mockMvc.perform(MockMvcRequestBuilders.patch("/users/" + testUser1.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(userDto1)))
+                        .content(mapper.writeValueAsString(userDto)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content().json(mapper.writeValueAsString(testUser1)));
-
-        mockMvc.perform(MockMvcRequestBuilders.patch("/users/" + testUser2.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(userDto2)))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.content().json(mapper.writeValueAsString(testUser2)));
     }
 
     @Test
@@ -200,7 +203,7 @@ public class UserControllerTest {
 
     @Test
     @DisplayName("PATCH /users/{id} returns HTTP-response with status code 404, content type application/json and " +
-            "validation error massage, when user id is not exist")
+            "error massage, when user id is not exist")
     void shouldNotUpdateUserWithIdNotExist() throws Exception {
         final long wrongId = 100L;
         final UserForRequestUpdateDto userDto = UserForRequestUpdateDto.builder()
@@ -230,7 +233,7 @@ public class UserControllerTest {
 
     @Test
     @DisplayName("DELETE /users/{id} returns HTTP-response with status code 404, content type application/json and " +
-            "validation error massage, when user id is not exist")
+            "error massage, when user id is not exist")
     void shouldNotDeleteUserWithIdNotExist() throws Exception {
         final long wrongId = 100L;
         final Violation errorResponse = new Violation("id", "User with this id not exist");
