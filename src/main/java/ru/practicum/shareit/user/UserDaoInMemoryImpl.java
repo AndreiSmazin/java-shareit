@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Repository
 @Slf4j
-public class UserDaoInMemoryImpl implements UserDao{
+public class UserDaoInMemoryImpl implements UserDao {
     private Map<Long, User> users = new HashMap<>();
     private long currentId = 1;
 

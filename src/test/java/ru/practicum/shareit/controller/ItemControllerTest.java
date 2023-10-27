@@ -73,7 +73,7 @@ public class ItemControllerTest {
         Mockito.when(itemService.findItem(1L, 3L)).thenReturn(testItem3);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/items/3")
-                .header("X-Sharer-User-Id", 1))
+                        .header("X-Sharer-User-Id", 1))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content().
@@ -146,7 +146,7 @@ public class ItemControllerTest {
         Mockito.when(itemService.searchItem(1L, text)).thenReturn(testItems);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/items/search?text=" + text)
-                .header("X-Sharer-User-Id", 1))
+                        .header("X-Sharer-User-Id", 1))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content().json(mapper.writeValueAsString(testItems.stream()

@@ -63,7 +63,7 @@ public class ItemService {
     public List<Item> searchItem(long userId, String text) {
         userService.findUser(userId);
 
-        if(text.isBlank()) {
+        if (text.isBlank()) {
             return new ArrayList<>();
         }
 
