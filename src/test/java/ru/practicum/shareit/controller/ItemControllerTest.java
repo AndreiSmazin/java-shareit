@@ -76,8 +76,8 @@ public class ItemControllerTest {
                         .header("X-Sharer-User-Id", 1))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.content().
-                        json(mapper.writeValueAsString(ItemMapper.toItemForResponseDto(testItem3))));
+                .andExpect(MockMvcResultMatchers.content()
+                        .json(mapper.writeValueAsString(ItemMapper.toItemForResponseDto(testItem3))));
     }
 
     @Test
