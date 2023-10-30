@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.DuplicateEmailException;
 import ru.practicum.shareit.exception.IdNotFoundException;
-import ru.practicum.shareit.user.dto.UserForRequestCreateDto;
-import ru.practicum.shareit.user.dto.UserForRequestUpdateDto;
+import ru.practicum.shareit.user.dao.UserDao;
+import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserService {
     private final UserDao userDao;
+    private final UserMapper userMapper;
 
     public User findUser(long id) {
         return userDao.find(id).orElseThrow(() -> new IdNotFoundException("User with this id not exist"));
@@ -25,16 +26,16 @@ public class UserService {
         return userDao.findAll();
     }
 
-    public User createNewUser(UserForRequestCreateDto userDto) {
+    public User createNewUser(UserDto userDto) {
         log.debug("+ createNewUser: {}", userDto);
 
         validateEmail(userDto.getEmail());
-        User user = UserMapper.toUser(userDto);
+        User user = userMapper.userDtoToUser(userDto);
 
         return userDao.create(user);
     }
 
-    public User updateUser(long id, UserForRequestUpdateDto userDto) {
+    public User updateUser(long id, UserDto userDto) {
         log.debug("+ updateUser: {}, {}", id, userDto);
 
         User targetUser = findUser(id);

@@ -10,6 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.practicum.shareit.exception.DuplicateEmailException;
 import ru.practicum.shareit.exception.IdNotFoundException;
@@ -17,8 +18,7 @@ import ru.practicum.shareit.exception.Violation;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserController;
 import ru.practicum.shareit.user.UserService;
-import ru.practicum.shareit.user.dto.UserForRequestCreateDto;
-import ru.practicum.shareit.user.dto.UserForRequestUpdateDto;
+import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.List;
 
@@ -28,7 +28,8 @@ public class UserControllerTest {
     private MockMvc mockMvc;
     @MockBean
     private UserService userService;
-    private ObjectMapper mapper = new ObjectMapper();
+    @Autowired
+    private ObjectMapper mapper;
 
     private final User testUser1 = User.builder()
             .id(1L)
@@ -54,6 +55,7 @@ public class UserControllerTest {
         Mockito.when(userService.findUser(1L)).thenReturn(testUser1);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/users/1"))
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content().json(mapper.writeValueAsString(testUser1)));
@@ -82,6 +84,7 @@ public class UserControllerTest {
         Mockito.when(userService.findAllUsers()).thenReturn(testUsers);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/users"))
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content().json(mapper.writeValueAsString(testUsers)));
@@ -91,15 +94,16 @@ public class UserControllerTest {
     @DisplayName("POST /users returns HTTP-response with status code 200, content type application/json and correct " +
             "created user")
     void shouldCreateNewUser() throws Exception {
-        final UserForRequestCreateDto userDto = UserForRequestCreateDto.builder()
+        final UserDto userDto = UserDto.builder()
                 .name("Иванов Иван")
                 .email("IvanovIvan@gmail.com")
                 .build();
         Mockito.when(userService.createNewUser(userDto)).thenReturn(testUser1);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(userDto)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(userDto)))
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content().json(mapper.writeValueAsString(testUser1)));
@@ -109,7 +113,7 @@ public class UserControllerTest {
     @DisplayName("POST /users returns HTTP-response with status code 400, content type application/json and " +
             "validation error massage, when input user`s fields is incorrect")
     void shouldNotCreateUserWithIncorrectFields() throws Exception {
-        final UserForRequestCreateDto incorrectUserDto = UserForRequestCreateDto.builder()
+        final UserDto incorrectUserDto = UserDto.builder()
                 .name(" ")
                 .email("IvanovIvanIvanovich")
                 .build();
@@ -117,8 +121,8 @@ public class UserControllerTest {
                 new Violation("email", "must be a well-formed email address"));
 
         mockMvc.perform(MockMvcRequestBuilders.post("/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(incorrectUserDto)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(incorrectUserDto)))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content().json(mapper.writeValueAsString(errorResponse)));
@@ -128,7 +132,7 @@ public class UserControllerTest {
     @DisplayName("POST /users returns HTTP-response with status code 400, content type application/json and " +
             "validation error massage, when input user`s fields is null")
     void shouldNotCreateUserWithNullFields() throws Exception {
-        final UserForRequestCreateDto incorrectUserDto = UserForRequestCreateDto.builder()
+        final UserDto incorrectUserDto = UserDto.builder()
                 .name(null)
                 .email(null)
                 .build();
@@ -147,7 +151,7 @@ public class UserControllerTest {
     @DisplayName("POST /users returns HTTP-response with status code 409, content type application/json and " +
             "validation error massage, when input user`s email already used")
     void shouldNotCreateUserWithDuplicateEmail() throws Exception {
-        final UserForRequestCreateDto incorrectUserDto = UserForRequestCreateDto.builder()
+        final UserDto incorrectUserDto = UserDto.builder()
                 .name("Иванов Иван")
                 .email("IvanovIvan@gmail.com")
                 .build();
@@ -157,8 +161,8 @@ public class UserControllerTest {
                 "this email is already exists"));
 
         mockMvc.perform(MockMvcRequestBuilders.post("/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(incorrectUserDto)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(incorrectUserDto)))
                 .andExpect(MockMvcResultMatchers.status().isConflict())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content().json(mapper.writeValueAsString(errorResponse)));
@@ -168,7 +172,7 @@ public class UserControllerTest {
     @DisplayName("PATCH /users/{id} returns HTTP-response with status code 200, content type application/json and " +
             "correct changed user")
     void shouldUpdateUser() throws Exception {
-        final UserForRequestUpdateDto userDto = UserForRequestUpdateDto.builder()
+        final UserDto userDto = UserDto.builder()
                 .name("Иванов Иван")
                 .email(null)
                 .build();
@@ -177,6 +181,7 @@ public class UserControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.patch("/users/" + testUser1.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(userDto)))
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content().json(mapper.writeValueAsString(testUser1)));
@@ -186,7 +191,7 @@ public class UserControllerTest {
     @DisplayName("PATCH /users/{id} returns HTTP-response with status code 400, content type application/json and " +
             "validation error massage, when input user`s email is incorrect")
     void shouldNotUpdateUserWithIncorrectEmail() throws Exception {
-        final UserForRequestUpdateDto incorrectUserDto = UserForRequestUpdateDto.builder()
+        final UserDto incorrectUserDto = UserDto.builder()
                 .name(null)
                 .email("IvanovIvanIvanovich")
                 .build();
@@ -196,6 +201,7 @@ public class UserControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.patch("/users/" + testUser1.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(incorrectUserDto)))
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content().json(mapper.writeValueAsString(errorResponse)));
@@ -206,7 +212,7 @@ public class UserControllerTest {
             "error massage, when user id is not exist")
     void shouldNotUpdateUserWithIdNotExist() throws Exception {
         final long wrongId = 100L;
-        final UserForRequestUpdateDto userDto = UserForRequestUpdateDto.builder()
+        final UserDto userDto = UserDto.builder()
                 .name("Иванов Иван")
                 .email("IvanovIvan@gmail.com")
                 .build();

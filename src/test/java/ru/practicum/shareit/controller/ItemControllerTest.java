@@ -1,6 +1,7 @@
 package ru.practicum.shareit.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -10,6 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.practicum.shareit.exception.AccessNotAllowedException;
 import ru.practicum.shareit.exception.IdNotFoundException;
@@ -18,8 +20,8 @@ import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.ItemController;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.ItemService;
-import ru.practicum.shareit.item.dto.ItemForRequestCreateDto;
-import ru.practicum.shareit.item.dto.ItemForRequestUpdateDto;
+import ru.practicum.shareit.item.dto.ItemForRequestDto;
+import ru.practicum.shareit.item.dto.ItemForResponseDto;
 import ru.practicum.shareit.user.User;
 
 import java.util.List;
@@ -30,8 +32,11 @@ public class ItemControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @MockBean
+    private ItemMapper itemMapper;
+    @MockBean
     private ItemService itemService;
-    private ObjectMapper mapper = new ObjectMapper();
+    @Autowired
+    private ObjectMapper mapper;
 
     private final User testUser1 = User.builder()
             .id(1L)
@@ -49,7 +54,7 @@ public class ItemControllerTest {
             .build();
 
     private final Item testItem2 = Item.builder()
-            .id(1L)
+            .id(2L)
             .name("Дрель аккумуляторная")
             .description("В комплекте запасной аккумулятор и набор бит")
             .available(true)
@@ -58,13 +63,28 @@ public class ItemControllerTest {
             .build();
 
     private final Item testItem3 = Item.builder()
-            .id(1L)
+            .id(3L)
             .name("Байдарка трёхместная Ладога")
             .description("2003г.в. в отличном состоянии, весла отсутствуют")
             .available(true)
             .owner(testUser1)
             .request(null)
             .build();
+
+    private ItemForResponseDto createItemForResponseDto(Item item) {
+        return ItemForResponseDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.isAvailable())
+                .build();
+    }
+
+    @BeforeEach
+    void createItemMapperMock() {
+        Mockito.when(itemMapper.itemToItemForResponseDto(Mockito.any()))
+                .thenAnswer(invocation -> createItemForResponseDto(invocation.getArgument(0)));
+    }
 
     @Test
     @DisplayName("GET /items/{id} returns HTTP-response with status code 200, content type application/json and " +
@@ -74,10 +94,11 @@ public class ItemControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.get("/items/3")
                         .header("X-Sharer-User-Id", 1))
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content()
-                        .json(mapper.writeValueAsString(ItemMapper.toItemForResponseDto(testItem3))));
+                        .json(mapper.writeValueAsString(createItemForResponseDto(testItem3))));
     }
 
     @Test
@@ -114,10 +135,11 @@ public class ItemControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.get("/items")
                         .header("X-Sharer-User-Id", 1))
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content().json(mapper.writeValueAsString(testItems.stream()
-                        .map(ItemMapper::toItemForResponseDto)
+                        .map(this::createItemForResponseDto)
                         .collect(Collectors.toList()))));
     }
 
@@ -147,10 +169,11 @@ public class ItemControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.get("/items/search?text=" + text)
                         .header("X-Sharer-User-Id", 1))
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content().json(mapper.writeValueAsString(testItems.stream()
-                        .map(ItemMapper::toItemForResponseDto)
+                        .map(this::createItemForResponseDto)
                         .collect(Collectors.toList()))));
     }
 
@@ -175,7 +198,7 @@ public class ItemControllerTest {
     @DisplayName("POST /items returns HTTP-response with status code 200, content type application/json and correct " +
             "created item")
     void shouldCreateNewItem() throws Exception {
-        final ItemForRequestCreateDto itemDto = ItemForRequestCreateDto.builder()
+        final ItemForRequestDto itemDto = ItemForRequestDto.builder()
                 .name("Дрель ударная Bosh")
                 .description("Мощность 7000W")
                 .available(true)
@@ -186,17 +209,18 @@ public class ItemControllerTest {
                         .header("X-Sharer-User-Id", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(itemDto)))
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content()
-                        .json(mapper.writeValueAsString(ItemMapper.toItemForResponseDto(testItem1))));
+                        .json(mapper.writeValueAsString(createItemForResponseDto(testItem1))));
     }
 
     @Test
     @DisplayName("POST /items returns HTTP-response with status code 400, content type application/json and " +
             "validation error massage, when input item`s fields is null")
     void shouldNotCreateItemWithNullFields() throws Exception {
-        final ItemForRequestCreateDto incorrectItemDto = ItemForRequestCreateDto.builder()
+        final ItemForRequestDto incorrectItemDto = ItemForRequestDto.builder()
                 .name(null)
                 .description(null)
                 .available(null)
@@ -219,7 +243,7 @@ public class ItemControllerTest {
             "massage, when user id is not exist")
     void shouldNotCreateItemWithIdNotExist() throws Exception {
         final long wrongId = 100L;
-        final ItemForRequestCreateDto itemDto = ItemForRequestCreateDto.builder()
+        final ItemForRequestDto itemDto = ItemForRequestDto.builder()
                 .name("Дрель ударная Bosh")
                 .description("Мощность 7000W")
                 .available(true)
@@ -241,7 +265,7 @@ public class ItemControllerTest {
     @DisplayName("PATCH /items/{id} returns HTTP-response with status code 200, content type application/json and " +
             "correct changed item")
     void shouldUpdateUser() throws Exception {
-        final ItemForRequestUpdateDto itemDto = ItemForRequestUpdateDto.builder()
+        final ItemForRequestDto itemDto = ItemForRequestDto.builder()
                 .name("Дрель ударная Bosh")
                 .description("Мощность 7000W")
                 .available(true)
@@ -252,10 +276,11 @@ public class ItemControllerTest {
                         .header("X-Sharer-User-Id", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(itemDto)))
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content()
-                        .json(mapper.writeValueAsString(ItemMapper.toItemForResponseDto(testItem1))));
+                        .json(mapper.writeValueAsString(createItemForResponseDto(testItem1))));
     }
 
     @Test
@@ -263,7 +288,7 @@ public class ItemControllerTest {
             "error message, when user does not access to item")
     void shouldNotUpdateItemWithoutAccess() throws Exception {
         final long wrongId = 2L;
-        final ItemForRequestUpdateDto itemDto = ItemForRequestUpdateDto.builder()
+        final ItemForRequestDto itemDto = ItemForRequestDto.builder()
                 .name("Дрель ударная Bosh")
                 .description("Мощность 7000W")
                 .available(true)
@@ -287,7 +312,7 @@ public class ItemControllerTest {
             "error message, when user id is not exist")
     void shouldNotUpdateItemWithIdNotExist() throws Exception {
         final long wrongId = 100L;
-        final ItemForRequestUpdateDto itemDto = ItemForRequestUpdateDto.builder()
+        final ItemForRequestDto itemDto = ItemForRequestDto.builder()
                 .name("Дрель ударная Bosh")
                 .description("Мощность 7000W")
                 .available(true)

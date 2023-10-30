@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.AccessNotAllowedException;
 import ru.practicum.shareit.exception.IdNotFoundException;
-import ru.practicum.shareit.item.dto.ItemForRequestCreateDto;
-import ru.practicum.shareit.item.dto.ItemForRequestUpdateDto;
+import ru.practicum.shareit.item.dao.ItemDao;
+import ru.practicum.shareit.item.dto.ItemForRequestDto;
 import ru.practicum.shareit.user.UserService;
 
 import java.util.ArrayList;
@@ -18,6 +18,7 @@ import java.util.List;
 public class ItemService {
     private final ItemDao itemDao;
     private final UserService userService;
+    private final ItemMapper itemMapper;
 
     public Item findItem(long userId, long id) {
         userService.findUser(userId);
@@ -32,16 +33,16 @@ public class ItemService {
     }
 
 
-    public Item createNewItem(long userId, ItemForRequestCreateDto itemDto) {
+    public Item createNewItem(long userId, ItemForRequestDto itemDto) {
         log.debug("+ createNewItem: {}, {}", userId, itemDto);
 
-        Item item = ItemMapper.toItem(itemDto);
+        Item item = itemMapper.itemRequestDtoToItem(itemDto);
         item.setOwner(userService.findUser(userId));
 
         return itemDao.create(item);
     }
 
-    public Item updateItem(long userId, long id, ItemForRequestUpdateDto itemDto) {
+    public Item updateItem(long userId, long id, ItemForRequestDto itemDto) {
         log.debug("+ updateItem: {}, {}, {}", userId, id, itemDto);
 
         Item targetItem = findItem(userId, id);

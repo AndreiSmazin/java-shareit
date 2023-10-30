@@ -2,27 +2,28 @@ package ru.practicum.shareit.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
 @Slf4j
 public class ErrorHandlingControllerAdvice {
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public List<Violation> onMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        e.getBindingResult().getFieldErrors().forEach(error -> log.error("Validation error: incorrect value" +
-                " '{}' of {}, {}", error.getRejectedValue(), error.getField(), error.getDefaultMessage()));
+    public List<Violation> onConstraintViolationException(ConstraintViolationException e) {
+        e.getConstraintViolations().forEach(error -> log.error("Validation error: incorrect value" +
+                " '{}' of {}, {}", error.getInvalidValue(), getFieldName(error), error.getMessage()));
 
-        return e.getBindingResult().getFieldErrors().stream()
-                .map(error -> new Violation(error.getField(), error.getDefaultMessage()))
+        return e.getConstraintViolations().stream()
+                .map(error -> new Violation(getFieldName(error), error.getMessage()))
                 .collect(Collectors.toList());
     }
 
@@ -51,5 +52,19 @@ public class ErrorHandlingControllerAdvice {
         log.error("AccessNotAllowedException: {}", e.getMessage());
 
         return new Violation("userId", e.getMessage());
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    public String onRuntimeException(RuntimeException e) {
+        log.error("RuntimeException: {}", e.getMessage());
+
+        return e.getMessage();
+    }
+
+    private String getFieldName(ConstraintViolation constraintViolation) {
+        String[] propertyPath = constraintViolation.getPropertyPath().toString().split("\\.");
+        return propertyPath[propertyPath.length - 1];
     }
 }
