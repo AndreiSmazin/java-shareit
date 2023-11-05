@@ -19,7 +19,7 @@ public class ErrorHandlingControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public List<Violation> onConstraintViolationException(ConstraintViolationException e) {
-        e.getConstraintViolations().forEach(error -> log.error("Validation error: incorrect value" +
+        e.getConstraintViolations().forEach(error -> log.debug("Validation error: incorrect value" +
                 " '{}' of {}, {}", error.getInvalidValue(), getFieldName(error), error.getMessage()));
 
         return e.getConstraintViolations().stream()
@@ -54,11 +54,11 @@ public class ErrorHandlingControllerAdvice {
         return new Violation("userId", e.getMessage());
     }
 
-    @ExceptionHandler(RuntimeException.class)
+    @ExceptionHandler(Throwable.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
-    public String onRuntimeException(RuntimeException e) {
-        log.error("RuntimeException: {}", e.getMessage());
+    public String onThrowable(Throwable e) {
+        log.error("Unpredictable error: {}", e.getMessage());
 
         return e.getMessage();
     }

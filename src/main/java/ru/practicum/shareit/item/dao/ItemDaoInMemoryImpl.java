@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 @Repository
 @Slf4j
 public class ItemDaoInMemoryImpl implements ItemDao {
-    private Map<Long, Item> items = new HashMap<>();
+    private final Map<Long, Item> items = new HashMap<>();
     private long currentId = 1;
 
     @Override

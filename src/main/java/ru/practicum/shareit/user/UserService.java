@@ -19,7 +19,8 @@ public class UserService {
     private final UserMapper userMapper;
 
     public User findUser(long id) {
-        return userDao.find(id).orElseThrow(() -> new IdNotFoundException("User with this id not exist"));
+        return userDao.find(id).orElseThrow(() ->
+                new IdNotFoundException(String.format("User with id %s not exist", id)));
     }
 
     public List<User> findAllUsers() {
@@ -64,7 +65,7 @@ public class UserService {
                 .collect(Collectors.toList());
 
         if (emails.contains(email)) {
-            throw new DuplicateEmailException("User with this email is already exists");
+            throw new DuplicateEmailException(String.format("User with email %s is already exists", email));
         }
     }
 }
