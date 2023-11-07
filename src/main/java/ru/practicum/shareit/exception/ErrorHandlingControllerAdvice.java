@@ -19,7 +19,7 @@ public class ErrorHandlingControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public List<Violation> onConstraintViolationException(ConstraintViolationException e) {
-        e.getConstraintViolations().forEach(error -> log.debug("Validation error: incorrect value" +
+        e.getConstraintViolations().forEach(error -> log.error("Validation error: incorrect value" +
                 " '{}' of {}, {}", error.getInvalidValue(), getFieldName(error), error.getMessage()));
 
         return e.getConstraintViolations().stream()

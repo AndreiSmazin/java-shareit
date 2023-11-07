@@ -1,7 +1,8 @@
 package ru.practicum.shareit.item;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.AccessNotAllowedException;
 import ru.practicum.shareit.exception.IdNotFoundException;
@@ -13,12 +14,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@AllArgsConstructor
 @Slf4j
 public class ItemService {
     private final ItemDao itemDao;
     private final UserService userService;
     private final ItemMapper itemMapper;
+
+    @Autowired
+    public ItemService(ItemDao itemDao,
+                       @Qualifier("userServiceDbImpl") UserService userService,
+                       ItemMapper itemMapper) {
+        this.itemDao = itemDao;
+        this.userService = userService;
+        this.itemMapper = itemMapper;
+    }
 
     public Item findItem(long userId, long id) {
         userService.findUser(userId);

@@ -1,7 +1,7 @@
 package ru.practicum.shareit.item;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -23,11 +23,16 @@ import java.util.stream.Collectors;
 @Validated
 @RestController
 @RequestMapping("/items")
-@AllArgsConstructor
 @Slf4j
 public class ItemController {
     private final ItemService itemService;
     private final ItemMapper itemMapper;
+
+    @Autowired
+    public ItemController(ItemService itemService, ItemMapper itemMapper) {
+        this.itemService = itemService;
+        this.itemMapper = itemMapper;
+    }
 
     @GetMapping("/{id}")
     public ItemForResponseDto find(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long id) {
