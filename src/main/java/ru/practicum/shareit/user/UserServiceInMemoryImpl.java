@@ -2,6 +2,7 @@ package ru.practicum.shareit.user;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.DuplicateEmailException;
 import ru.practicum.shareit.exception.IdNotFoundException;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
+@Qualifier("userServiceInMemoryImpl")
 @Slf4j
 public class UserServiceInMemoryImpl implements UserService {
     private final UserDao userDao;

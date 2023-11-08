@@ -9,7 +9,6 @@ import ru.practicum.shareit.exception.IdNotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -65,11 +64,7 @@ public class UserServiceDbImpl implements UserService {
     }
 
     private void validateEmail(String email) {
-        List<String> emails = findAllUsers().stream()
-                .map(User::getEmail)
-                .collect(Collectors.toList());
-
-        if (emails.contains(email)) {
+        if (userRepository.findByEmail(email).isPresent()) {
             throw new DuplicateEmailException(String.format("User with email %s is already exists", email));
         }
     }

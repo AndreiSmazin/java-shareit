@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -16,10 +17,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.practicum.shareit.exception.AccessNotAllowedException;
 import ru.practicum.shareit.exception.IdNotFoundException;
 import ru.practicum.shareit.exception.Violation;
-import ru.practicum.shareit.item.Item;
-import ru.practicum.shareit.item.ItemController;
-import ru.practicum.shareit.item.ItemMapper;
-import ru.practicum.shareit.item.ItemService;
+import ru.practicum.shareit.item.*;
 import ru.practicum.shareit.item.dto.ItemForRequestDto;
 import ru.practicum.shareit.item.dto.ItemForResponseDto;
 import ru.practicum.shareit.user.User;
@@ -34,6 +32,7 @@ public class ItemControllerTest {
     @MockBean
     private ItemMapper itemMapper;
     @MockBean
+    @Qualifier("itemServiceDbImpl")
     private ItemService itemService;
     @Autowired
     private ObjectMapper mapper;

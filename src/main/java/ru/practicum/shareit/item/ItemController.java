@@ -2,6 +2,7 @@ package ru.practicum.shareit.item;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -29,7 +30,7 @@ public class ItemController {
     private final ItemMapper itemMapper;
 
     @Autowired
-    public ItemController(ItemService itemService, ItemMapper itemMapper) {
+    public ItemController(@Qualifier("itemServiceDbImpl") ItemService itemService, ItemMapper itemMapper) {
         this.itemService = itemService;
         this.itemMapper = itemMapper;
     }
