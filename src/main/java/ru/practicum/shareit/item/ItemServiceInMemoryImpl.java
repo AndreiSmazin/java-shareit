@@ -36,6 +36,11 @@ public class ItemServiceInMemoryImpl implements ItemService {
                 new IdNotFoundException(String.format("Item with id %s not exist", id)));
     }
 
+    public Item findItem(long id) {
+        return itemDao.find(id).orElseThrow(() ->
+                new IdNotFoundException(String.format("Item with id %s not exist", id)));
+    }
+
     public List<Item> findAllItems(long userId) {
         userService.findUser(userId);
 
@@ -46,7 +51,7 @@ public class ItemServiceInMemoryImpl implements ItemService {
     public Item createNewItem(long userId, ItemForRequestDto itemDto) {
         log.debug("+ createNewItem: {}, {}", userId, itemDto);
 
-        Item item = itemMapper.itemRequestDtoToItem(itemDto);
+        Item item = itemMapper.itemForRequestDtoToItem(itemDto);
         item.setOwner(userService.findUser(userId));
 
         return itemDao.create(item);

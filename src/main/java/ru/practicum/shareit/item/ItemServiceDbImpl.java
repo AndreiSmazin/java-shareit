@@ -36,6 +36,12 @@ public class ItemServiceDbImpl implements ItemService {
     }
 
     @Override
+    public Item findItem(long id) {
+        return itemRepository.findById(id).orElseThrow(() ->
+                new IdNotFoundException(String.format("Item with id %s not exist", id)));
+    }
+
+    @Override
     public List<Item> findAllItems(long userId) {
         long ownerId = userService.findUser(userId).getId();
 
@@ -46,7 +52,7 @@ public class ItemServiceDbImpl implements ItemService {
     public Item createNewItem(long userId, ItemForRequestDto itemDto) {
         log.debug("+ createNewItem: {}, {}", userId, itemDto);
 
-        Item item = itemMapper.itemRequestDtoToItem(itemDto);
+        Item item = itemMapper.itemForRequestDtoToItem(itemDto);
         item.setOwner(userService.findUser(userId));
 
         return itemRepository.save(item);
@@ -85,7 +91,7 @@ public class ItemServiceDbImpl implements ItemService {
 
     private void validateOwner(long userId, Item item) {
         if (userId != item.getOwner().getId()) {
-            throw new AccessNotAllowedException("User does not have access to target item");
+            throw new AccessNotAllowedException(String.format("User %s does not have access to target item", userId));
         }
     }
 }

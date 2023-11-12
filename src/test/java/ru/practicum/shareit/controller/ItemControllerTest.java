@@ -16,8 +16,11 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.practicum.shareit.exception.AccessNotAllowedException;
 import ru.practicum.shareit.exception.IdNotFoundException;
-import ru.practicum.shareit.exception.Violation;
-import ru.practicum.shareit.item.*;
+import ru.practicum.shareit.exception.ValidationViolation;
+import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.item.ItemController;
+import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.item.dto.ItemForRequestDto;
 import ru.practicum.shareit.item.dto.ItemForResponseDto;
 import ru.practicum.shareit.user.User;
@@ -105,8 +108,8 @@ public class ItemControllerTest {
             "error massage, when user or item id is not exist")
     void shouldNotReturnItemWithIdNotExist() throws Exception {
         final long wrongId = 100L;
-        final Violation itemErrorResponse = new Violation("id", "Item with this id not exist");
-        final Violation userErrorResponse = new Violation("id", "User with this id not exist");
+        final ValidationViolation itemErrorResponse = new ValidationViolation("id", "Item with this id not exist");
+        final ValidationViolation userErrorResponse = new ValidationViolation("id", "User with this id not exist");
         Mockito.when(itemService.findItem(wrongId, 1L)).thenThrow(new IdNotFoundException("User with this id " +
                 "not exist"));
         Mockito.when(itemService.findItem(1L, wrongId)).thenThrow(new IdNotFoundException("Item with this id " +
@@ -147,7 +150,7 @@ public class ItemControllerTest {
             "error massage, when user id is not exist")
     void shouldNotReturnAllItemsWithIdNotExist() throws Exception {
         final long wrongId = 100L;
-        final Violation errorResponse = new Violation("id", "User with this id not exist");
+        final ValidationViolation errorResponse = new ValidationViolation("id", "User with this id not exist");
         Mockito.when(itemService.findAllItems(wrongId)).thenThrow(new IdNotFoundException("User with this id " +
                 "not exist"));
 
@@ -182,7 +185,7 @@ public class ItemControllerTest {
     void shouldNotReturnSearchedItemsWithIdNotExist() throws Exception {
         final String text = "Дрель";
         final long wrongId = 100L;
-        final Violation errorResponse = new Violation("id", "User with this id not exist");
+        final ValidationViolation errorResponse = new ValidationViolation("id", "User with this id not exist");
         Mockito.when(itemService.searchItem(wrongId, text)).thenThrow(new IdNotFoundException("User with this id " +
                 "not exist"));
 
@@ -224,9 +227,9 @@ public class ItemControllerTest {
                 .description(null)
                 .available(null)
                 .build();
-        final List<Violation> errorResponse = List.of(new Violation("name", "must not be blank"),
-                new Violation("description", "must not be blank"),
-                new Violation("available", "must not be null"));
+        final List<ValidationViolation> errorResponse = List.of(new ValidationViolation("name", "must not be blank"),
+                new ValidationViolation("description", "must not be blank"),
+                new ValidationViolation("available", "must not be null"));
 
         mockMvc.perform(MockMvcRequestBuilders.post("/items")
                         .header("X-Sharer-User-Id", 1)
@@ -247,7 +250,7 @@ public class ItemControllerTest {
                 .description("Мощность 7000W")
                 .available(true)
                 .build();
-        final Violation errorResponse = new Violation("id", "User with this id not exist");
+        final ValidationViolation errorResponse = new ValidationViolation("id", "User with this id not exist");
         Mockito.when(itemService.createNewItem(wrongId, itemDto))
                 .thenThrow(new IdNotFoundException("User with this id not exist"));
 
@@ -292,7 +295,7 @@ public class ItemControllerTest {
                 .description("Мощность 7000W")
                 .available(true)
                 .build();
-        final Violation errorResponse = new Violation("userId", "User does not have access to target " +
+        final ValidationViolation errorResponse = new ValidationViolation("userId", "User does not have access to target " +
                 "item");
         Mockito.when(itemService.updateItem(wrongId, testItem1.getId(), itemDto))
                 .thenThrow(new AccessNotAllowedException("User does not have access to target item"));
@@ -316,7 +319,7 @@ public class ItemControllerTest {
                 .description("Мощность 7000W")
                 .available(true)
                 .build();
-        final Violation errorResponse = new Violation("id", "User with this id not exist");
+        final ValidationViolation errorResponse = new ValidationViolation("id", "User with this id not exist");
         Mockito.when(itemService.updateItem(wrongId, testItem1.getId(), itemDto))
                 .thenThrow(new IdNotFoundException("User with this id not exist"));
 

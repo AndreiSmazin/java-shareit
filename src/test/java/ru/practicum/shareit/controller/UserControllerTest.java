@@ -15,7 +15,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.practicum.shareit.exception.DuplicateEmailException;
 import ru.practicum.shareit.exception.IdNotFoundException;
-import ru.practicum.shareit.exception.Violation;
+import ru.practicum.shareit.exception.ValidationViolation;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserController;
 import ru.practicum.shareit.user.UserService;
@@ -68,7 +68,7 @@ public class UserControllerTest {
             "error massage, when user id is not exist")
     void shouldNotReturnUserWithIdNotExist() throws Exception {
         final long wrongId = 100L;
-        final Violation errorResponse = new Violation("id", "User with this id not exist");
+        final ValidationViolation errorResponse = new ValidationViolation("id", "User with this id not exist");
         Mockito.when(userService.findUser(wrongId)).thenThrow(new IdNotFoundException("User with this id " +
                 "not exist"));
 
@@ -80,7 +80,7 @@ public class UserControllerTest {
 
     @Test
     @DisplayName("GET /users returns HTTP-response with status code 200, content type application/json and correct " +
-                        "list of users")
+            "list of users")
     void shouldReturnAllUsers() throws Exception {
         final List<User> testUsers = List.of(testUser1, testUser2, testUser3);
         Mockito.when(userService.findAllUsers()).thenReturn(testUsers);
@@ -119,8 +119,8 @@ public class UserControllerTest {
                 .name(" ")
                 .email("IvanovIvanIvanovich")
                 .build();
-        final List<Violation> errorResponse = List.of(new Violation("name", "must not be blank"),
-                new Violation("email", "must be a well-formed email address"));
+        final List<ValidationViolation> errorResponse = List.of(new ValidationViolation("name", "must not be blank"),
+                new ValidationViolation("email", "must be a well-formed email address"));
 
         mockMvc.perform(MockMvcRequestBuilders.post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -138,8 +138,8 @@ public class UserControllerTest {
                 .name(null)
                 .email(null)
                 .build();
-        final List<Violation> errorResponse = List.of(new Violation("name", "must not be blank"),
-                new Violation("email", "must not be null"));
+        final List<ValidationViolation> errorResponse = List.of(new ValidationViolation("name", "must not be blank"),
+                new ValidationViolation("email", "must not be null"));
 
         mockMvc.perform(MockMvcRequestBuilders.post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -157,7 +157,7 @@ public class UserControllerTest {
                 .name("Иванов Иван")
                 .email("IvanovIvan@gmail.com")
                 .build();
-        final Violation errorResponse = new Violation("email", "User with this email is already " +
+        final ValidationViolation errorResponse = new ValidationViolation("email", "User with this email is already " +
                 "exists");
         Mockito.when(userService.createNewUser(incorrectUserDto)).thenThrow(new DuplicateEmailException("User with " +
                 "this email is already exists"));
@@ -197,7 +197,7 @@ public class UserControllerTest {
                 .name(null)
                 .email("IvanovIvanIvanovich")
                 .build();
-        final List<Violation> errorResponse = List.of(new Violation("email", "must be a well-formed " +
+        final List<ValidationViolation> errorResponse = List.of(new ValidationViolation("email", "must be a well-formed " +
                 "email address"));
 
         mockMvc.perform(MockMvcRequestBuilders.patch("/users/" + testUser1.getId())
@@ -218,7 +218,7 @@ public class UserControllerTest {
                 .name("Иванов Иван")
                 .email("IvanovIvan@gmail.com")
                 .build();
-        final Violation errorResponse = new Violation("id", "User with this id not exist");
+        final ValidationViolation errorResponse = new ValidationViolation("id", "User with this id not exist");
         Mockito.when(userService.updateUser(wrongId, userDto)).thenThrow(new IdNotFoundException("User with this id " +
                 "not exist"));
 
@@ -244,7 +244,7 @@ public class UserControllerTest {
             "error massage, when user id is not exist")
     void shouldNotDeleteUserWithIdNotExist() throws Exception {
         final long wrongId = 100L;
-        final Violation errorResponse = new Violation("id", "User with this id not exist");
+        final ValidationViolation errorResponse = new ValidationViolation("id", "User with this id not exist");
 
         Mockito.doThrow(new IdNotFoundException("User with this id not exist")).when(userService).deleteUser(wrongId);
 
