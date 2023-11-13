@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.item.dto.ItemForRequestDto;
 import ru.practicum.shareit.item.dto.ItemForResponseDto;
+import ru.practicum.shareit.item.dto.ItemForResponseWithBookingsDto;
 import ru.practicum.shareit.user.Marker;
 
 import javax.validation.Valid;
@@ -36,16 +37,13 @@ public class ItemController {
     }
 
     @GetMapping("/{id}")
-    public ItemForResponseDto find(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long id) {
-        return itemMapper.itemToItemForResponseDto(itemService.findItem(userId, id));
+    public ItemForResponseWithBookingsDto find(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long id) {
+        return itemService.findItem(userId, id);
     }
 
     @GetMapping
-    public List<ItemForResponseDto> findAll(@RequestHeader("X-Sharer-User-Id") long userId) {
-
-        return itemService.findAllItems(userId).stream()
-                .map(itemMapper::itemToItemForResponseDto)
-                .collect(Collectors.toList());
+    public List<ItemForResponseWithBookingsDto> findAll(@RequestHeader("X-Sharer-User-Id") long userId) {
+        return itemService.findAllItems(userId);
     }
 
     @GetMapping("/search")

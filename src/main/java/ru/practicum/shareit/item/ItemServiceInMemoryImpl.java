@@ -8,10 +8,12 @@ import ru.practicum.shareit.exception.AccessNotAllowedException;
 import ru.practicum.shareit.exception.IdNotFoundException;
 import ru.practicum.shareit.item.dao.ItemDao;
 import ru.practicum.shareit.item.dto.ItemForRequestDto;
+import ru.practicum.shareit.item.dto.ItemForResponseWithBookingsDto;
 import ru.practicum.shareit.user.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -29,11 +31,13 @@ public class ItemServiceInMemoryImpl implements ItemService {
         this.itemMapper = itemMapper;
     }
 
-    public Item findItem(long userId, long id) {
+    public ItemForResponseWithBookingsDto findItem(long userId, long id) {
         userService.findUser(userId);
 
-        return itemDao.find(id).orElseThrow(() ->
+        Item item = itemDao.find(id).orElseThrow(() ->
                 new IdNotFoundException(String.format("Item with id %s not exist", id)));
+
+        return itemMapper.itemToItemForResponseWithBookingsDto(item);
     }
 
     public Item findItem(long id) {
@@ -41,10 +45,14 @@ public class ItemServiceInMemoryImpl implements ItemService {
                 new IdNotFoundException(String.format("Item with id %s not exist", id)));
     }
 
-    public List<Item> findAllItems(long userId) {
+    public List<ItemForResponseWithBookingsDto> findAllItems(long userId) {
         userService.findUser(userId);
 
-        return itemDao.findAll(userId);
+        List<Item> items = itemDao.findAll(userId);
+
+        return items.stream()
+                .map(itemMapper::itemToItemForResponseWithBookingsDto)
+                .collect(Collectors.toList());
     }
 
 
@@ -60,7 +68,9 @@ public class ItemServiceInMemoryImpl implements ItemService {
     public Item updateItem(long userId, long id, ItemForRequestDto itemDto) {
         log.debug("+ updateItem: {}, {}, {}", userId, id, itemDto);
 
-        Item targetItem = findItem(userId, id);
+        userService.findUser(userId);
+
+        Item targetItem = findItem(id);
         validateOwner(userId, targetItem);
         if (itemDto.getName() != null) {
             targetItem.setName(itemDto.getName());
