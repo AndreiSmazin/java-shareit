@@ -20,15 +20,24 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             " join b.item as i" +
             " join b.booker as br" +
             " where i.id = ?1" +
-            " and b.end < current_timestamp" +
+            " and b.status = 'APPROVED'" +
+            " and b.start < current_timestamp" +
             " order by b.end desc")
-    List<BookingForItemDto> findPastBookings(Long id);
+    List<BookingForItemDto> findPastBookingsOfItem(Long id);
 
     @Query("select new ru.practicum.shareit.booking.dto.BookingForItemDto(b.id, br.id) from Booking as b" +
             " join b.item as i" +
             " join b.booker as br" +
             " where i.id = ?1" +
+            " and b.status = 'APPROVED'" +
             " and b.start > current_timestamp" +
             " order by b.end")
-    List<BookingForItemDto> findFutureBookings(Long id);
+    List<BookingForItemDto> findFutureBookingsOfItem(Long id);
+
+    @Query("select count(b) from Booking as b" +
+            " join b.booker as br" +
+            " where br.id = ?1" +
+            " and b.status = 'APPROVED'" +
+            " and b.end < current_timestamp")
+    int findCountBookingsOfUser(Long id);
 }

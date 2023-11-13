@@ -7,8 +7,9 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.AccessNotAllowedException;
 import ru.practicum.shareit.exception.IdNotFoundException;
 import ru.practicum.shareit.item.dao.ItemDao;
+import ru.practicum.shareit.item.dto.CommentForRequestDto;
 import ru.practicum.shareit.item.dto.ItemForRequestDto;
-import ru.practicum.shareit.item.dto.ItemForResponseWithBookingsDto;
+import ru.practicum.shareit.item.dto.ExtendedItemForResponseDto;
 import ru.practicum.shareit.user.UserService;
 
 import java.util.ArrayList;
@@ -31,13 +32,13 @@ public class ItemServiceInMemoryImpl implements ItemService {
         this.itemMapper = itemMapper;
     }
 
-    public ItemForResponseWithBookingsDto findItem(long userId, long id) {
+    public ExtendedItemForResponseDto findItem(long userId, long id) {
         userService.findUser(userId);
 
         Item item = itemDao.find(id).orElseThrow(() ->
                 new IdNotFoundException(String.format("Item with id %s not exist", id)));
 
-        return itemMapper.itemToItemForResponseWithBookingsDto(item);
+        return itemMapper.itemToExtendedItemForResponseDto(item);
     }
 
     public Item findItem(long id) {
@@ -45,13 +46,13 @@ public class ItemServiceInMemoryImpl implements ItemService {
                 new IdNotFoundException(String.format("Item with id %s not exist", id)));
     }
 
-    public List<ItemForResponseWithBookingsDto> findAllItems(long userId) {
+    public List<ExtendedItemForResponseDto> findAllItems(long userId) {
         userService.findUser(userId);
 
         List<Item> items = itemDao.findAll(userId);
 
         return items.stream()
-                .map(itemMapper::itemToItemForResponseWithBookingsDto)
+                .map(itemMapper::itemToExtendedItemForResponseDto)
                 .collect(Collectors.toList());
     }
 
@@ -94,6 +95,11 @@ public class ItemServiceInMemoryImpl implements ItemService {
         }
 
         return itemDao.search(text);
+    }
+
+    @Override
+    public Comment createNewComment(long userId, long itemId, CommentForRequestDto commentDto) {
+        return null;
     }
 
     private void validateOwner(long userId, Item item) {
