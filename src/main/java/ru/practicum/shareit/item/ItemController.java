@@ -1,8 +1,7 @@
 package ru.practicum.shareit.item;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -13,26 +12,23 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.dto.CommentForRequestDto;
+import ru.practicum.shareit.item.dto.CommentForResponseDto;
+import ru.practicum.shareit.item.dto.ExtendedItemForResponseDto;
+import ru.practicum.shareit.item.dto.ItemForRequestDto;
+import ru.practicum.shareit.item.dto.ItemForResponseDto;
 import ru.practicum.shareit.user.Marker;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Validated
 @RestController
 @RequestMapping("/items")
+@RequiredArgsConstructor
 @Slf4j
 public class ItemController {
     private final ItemService itemService;
-    private final ItemMapper itemMapper;
-
-    @Autowired
-    public ItemController(@Qualifier("itemServiceDbImpl") ItemService itemService, ItemMapper itemMapper) {
-        this.itemService = itemService;
-        this.itemMapper = itemMapper;
-    }
 
     @GetMapping("/{id}")
     public ExtendedItemForResponseDto find(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long id) {
@@ -47,9 +43,7 @@ public class ItemController {
     @GetMapping("/search")
     public List<ItemForResponseDto> search(@RequestHeader("X-Sharer-User-Id") long userId,
                                            @RequestParam String text) {
-        return itemService.searchItem(userId, text).stream()
-                .map(itemMapper::itemToItemForResponseDto)
-                .collect(Collectors.toList());
+        return itemService.searchItem(userId, text);
     }
 
     @PostMapping
@@ -58,7 +52,7 @@ public class ItemController {
                                      @Valid @RequestBody ItemForRequestDto itemDto) {
         log.debug("Received POST-request /items with header X-Sharer-User-Id={} and body: {}", userId, itemDto);
 
-        return itemMapper.itemToItemForResponseDto(itemService.createNewItem(userId, itemDto));
+        return itemService.createNewItem(userId, itemDto);
     }
 
     @PatchMapping("/{id}")
@@ -68,7 +62,7 @@ public class ItemController {
                                      @RequestBody ItemForRequestDto itemDto) {
         log.debug("Received PATCH-request /items/{} with header X-Sharer-User-Id={} and body: {}", id, userId, itemDto);
 
-        return itemMapper.itemToItemForResponseDto(itemService.updateItem(userId, id, itemDto));
+        return itemService.updateItem(userId, id, itemDto);
     }
 
     @PostMapping("/{id}/comment")
@@ -78,8 +72,6 @@ public class ItemController {
         log.debug("Received POST-request /items/{}/comment with header X-Sharer-User-Id={} and body: {}", id, userId,
                 commentDto);
 
-        Comment comment = itemService.createNewComment(userId, id, commentDto);
-
-        return itemMapper.commentToCommentForResponseDto(comment, comment.getAuthor());
+        return itemService.createNewComment(userId, id, commentDto);
     }
 }

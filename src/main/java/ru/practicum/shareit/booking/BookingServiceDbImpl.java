@@ -1,10 +1,10 @@
 package ru.practicum.shareit.booking;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingForRequestDto;
+import ru.practicum.shareit.booking.dto.BookingForResponseDto;
 import ru.practicum.shareit.exception.AccessNotAllowedException;
 import ru.practicum.shareit.exception.IdNotFoundException;
 import ru.practicum.shareit.exception.RequestValidationException;
@@ -18,30 +18,23 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class BookingServiceDbImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final UserService userService;
     private final ItemService itemService;
-
-    @Autowired
-    public BookingServiceDbImpl(BookingRepository bookingRepository,
-                                @Qualifier("userServiceDbImpl") UserService userService,
-                                @Qualifier("itemServiceDbImpl") ItemService itemService) {
-        this.bookingRepository = bookingRepository;
-        this.userService = userService;
-        this.itemService = itemService;
-    }
+    private final BookingMapper bookingMapper;
 
     @Override
-    public Booking findBooking(long userId, long id) {
+    public BookingForResponseDto findBooking(long userId, long id) {
         userService.findUser(userId);
 
         Booking booking = bookingRepository.findById(id).orElseThrow(() ->
                 new IdNotFoundException(String.format("Booking with id %s not exist", id)));
         validateViewer(userId, booking);
 
-        return booking;
+        return bookingMapper.bookingToBookingForResponseDto(booking);
     }
 
     @Override
@@ -51,25 +44,29 @@ public class BookingServiceDbImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> findAllBookingsByUserId(long userId, String state) {
+    public List<BookingForResponseDto> findAllBookingsByUserId(long userId, String state) {
         userService.findUser(userId);
 
         List<Booking> bookings = bookingRepository.findAllByBookerIdOrderByStartDesc(userId);
 
-        return filterBookingsByState(bookings, state);
+        return filterBookingsByState(bookings, state).stream()
+                .map(bookingMapper::bookingToBookingForResponseDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<Booking> findAllBookingsByOwnerId(long userId, String state) {
+    public List<BookingForResponseDto> findAllBookingsByOwnerId(long userId, String state) {
         userService.findUser(userId);
 
         List<Booking> bookings = bookingRepository.findAllByItemOwnerIdOrderByStartDesc(userId);
 
-        return filterBookingsByState(bookings, state);
+        return filterBookingsByState(bookings, state).stream()
+                .map(bookingMapper::bookingToBookingForResponseDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Booking createNewBooking(long userId, BookingForRequestDto bookingDto) {
+    public BookingForResponseDto createNewBooking(long userId, BookingForRequestDto bookingDto) {
         log.debug("+ createNewBooking: {}, {}", userId, bookingDto);
 
         Booking booking = new Booking();
@@ -88,11 +85,11 @@ public class BookingServiceDbImpl implements BookingService {
 
         booking.setStatus(BookingStatus.WAITING);
 
-        return bookingRepository.save(booking);
+        return bookingMapper.bookingToBookingForResponseDto(bookingRepository.save(booking));
     }
 
     @Override
-    public Booking updateBookingStatus(long userId, long id, boolean approved) {
+    public BookingForResponseDto updateBookingStatus(long userId, long id, boolean approved) {
         log.debug("+ updateBookingStatus: {}, {}, {}", userId, id, approved);
 
         userService.findUser(userId);
@@ -102,7 +99,7 @@ public class BookingServiceDbImpl implements BookingService {
         validateApproved(booking);
         booking.setStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
 
-        return bookingRepository.save(booking);
+        return bookingMapper.bookingToBookingForResponseDto(bookingRepository.save(booking));
     }
 
     private void validateBookingPeriod(LocalDateTime start, LocalDateTime end) {

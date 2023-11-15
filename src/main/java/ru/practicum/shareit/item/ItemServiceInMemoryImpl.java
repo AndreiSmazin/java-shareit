@@ -1,15 +1,12 @@
 package ru.practicum.shareit.item;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.AccessNotAllowedException;
 import ru.practicum.shareit.exception.IdNotFoundException;
 import ru.practicum.shareit.item.dao.ItemDao;
-import ru.practicum.shareit.item.dto.CommentForRequestDto;
-import ru.practicum.shareit.item.dto.ItemForRequestDto;
-import ru.practicum.shareit.item.dto.ExtendedItemForResponseDto;
+import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.user.UserService;
 
 import java.util.ArrayList;
@@ -17,20 +14,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class ItemServiceInMemoryImpl implements ItemService {
     private final ItemDao itemDao;
     private final UserService userService;
     private final ItemMapper itemMapper;
-
-    @Autowired
-    public ItemServiceInMemoryImpl(ItemDao itemDao,
-                                   @Qualifier("userServiceInMemoryImpl") UserService userService,
-                                   ItemMapper itemMapper) {
-        this.itemDao = itemDao;
-        this.userService = userService;
-        this.itemMapper = itemMapper;
-    }
 
     public ExtendedItemForResponseDto findItem(long userId, long id) {
         userService.findUser(userId);
@@ -57,16 +46,16 @@ public class ItemServiceInMemoryImpl implements ItemService {
     }
 
 
-    public Item createNewItem(long userId, ItemForRequestDto itemDto) {
+    public ItemForResponseDto createNewItem(long userId, ItemForRequestDto itemDto) {
         log.debug("+ createNewItem: {}, {}", userId, itemDto);
 
         Item item = itemMapper.itemForRequestDtoToItem(itemDto);
         item.setOwner(userService.findUser(userId));
 
-        return itemDao.create(item);
+        return itemMapper.itemToItemForResponseDto(itemDao.create(item));
     }
 
-    public Item updateItem(long userId, long id, ItemForRequestDto itemDto) {
+    public ItemForResponseDto updateItem(long userId, long id, ItemForRequestDto itemDto) {
         log.debug("+ updateItem: {}, {}, {}", userId, id, itemDto);
 
         userService.findUser(userId);
@@ -84,21 +73,23 @@ public class ItemServiceInMemoryImpl implements ItemService {
         }
         itemDao.update(targetItem);
 
-        return targetItem;
+        return itemMapper.itemToItemForResponseDto(targetItem);
     }
 
-    public List<Item> searchItem(long userId, String text) {
+    public List<ItemForResponseDto> searchItem(long userId, String text) {
         userService.findUser(userId);
 
         if (text.isBlank()) {
             return new ArrayList<>();
         }
 
-        return itemDao.search(text);
+        return itemDao.search(text).stream()
+                .map(itemMapper::itemToItemForResponseDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Comment createNewComment(long userId, long itemId, CommentForRequestDto commentDto) {
+    public CommentForResponseDto createNewComment(long userId, long itemId, CommentForRequestDto commentDto) {
         return null;
     }
 

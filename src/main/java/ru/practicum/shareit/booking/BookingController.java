@@ -1,7 +1,7 @@
 package ru.practicum.shareit.booking;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -18,41 +18,31 @@ import ru.practicum.shareit.booking.dto.BookingForResponseDto;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Validated
 @RestController
 @RequestMapping(path = "/bookings")
+@RequiredArgsConstructor
 @Slf4j
 public class BookingController {
     private final BookingService bookingService;
     private final BookingMapper bookingMapper;
 
-    @Autowired
-    public BookingController(BookingService bookingService, BookingMapper bookingMapper) {
-        this.bookingService = bookingService;
-        this.bookingMapper = bookingMapper;
-    }
-
     @GetMapping("/{id}")
     public BookingForResponseDto find(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long id) {
-        return bookingMapper.bookingToBookingForResponseDto(bookingService.findBooking(userId, id));
+        return bookingService.findBooking(userId, id);
     }
 
     @GetMapping
     public List<BookingForResponseDto> findAllForUser(@RequestHeader("X-Sharer-User-Id") long userId,
                                                       @RequestParam(defaultValue = "ALL") String state) {
-        return bookingService.findAllBookingsByUserId(userId, state).stream()
-                .map(bookingMapper::bookingToBookingForResponseDto)
-                .collect(Collectors.toList());
+        return bookingService.findAllBookingsByUserId(userId, state);
     }
 
     @GetMapping("/owner")
     public List<BookingForResponseDto> findAllForOwner(@RequestHeader("X-Sharer-User-Id") long userId,
                                                        @RequestParam(defaultValue = "ALL") String state) {
-        return bookingService.findAllBookingsByOwnerId(userId, state).stream()
-                .map(bookingMapper::bookingToBookingForResponseDto)
-                .collect(Collectors.toList());
+        return bookingService.findAllBookingsByOwnerId(userId, state);
     }
 
     @PostMapping
@@ -60,7 +50,7 @@ public class BookingController {
                                         @Valid @RequestBody BookingForRequestDto bookingDto) {
         log.debug("Received POST-request /bookings with header X-Sharer-User-Id={} and body: {}", userId, bookingDto);
 
-        return bookingMapper.bookingToBookingForResponseDto(bookingService.createNewBooking(userId, bookingDto));
+        return bookingService.createNewBooking(userId, bookingDto);
     }
 
     @PatchMapping("/{id}")
@@ -70,6 +60,6 @@ public class BookingController {
         log.debug("Received PATCH-request /bookings/{} with header X-Sharer-User-Id={}, and parameter: {}",
                 id, userId, approved);
 
-        return bookingMapper.bookingToBookingForResponseDto(bookingService.updateBookingStatus(userId, id, approved));
+        return bookingService.updateBookingStatus(userId, id, approved);
     }
 }

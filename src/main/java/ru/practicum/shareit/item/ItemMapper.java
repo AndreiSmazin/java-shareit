@@ -9,9 +9,10 @@ import ru.practicum.shareit.item.dto.ItemForResponseDto;
 import ru.practicum.shareit.item.dto.ExtendedItemForResponseDto;
 import ru.practicum.shareit.user.User;
 
-@Mapper(componentModel = "spring")
-public interface ItemMapper {
+import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
 
+@Mapper(componentModel = SPRING)
+public interface ItemMapper {
     Item itemForRequestDtoToItem(ItemForRequestDto itemForRequestDto);
 
     ItemForResponseDto itemToItemForResponseDto(Item item);

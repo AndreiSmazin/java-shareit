@@ -1,17 +1,17 @@
 package ru.practicum.shareit.user;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.IdNotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.List;
 
+@Primary
 @Service
-@AllArgsConstructor
-@Qualifier("userServiceDbImpl")
+@RequiredArgsConstructor
 @Slf4j
 public class UserServiceDbImpl implements UserService {
     private final UserRepository userRepository;

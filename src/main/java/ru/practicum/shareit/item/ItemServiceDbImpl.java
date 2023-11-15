@@ -1,7 +1,8 @@
 package ru.practicum.shareit.item;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.dto.BookingForItemDto;
@@ -10,8 +11,9 @@ import ru.practicum.shareit.exception.IdNotFoundException;
 import ru.practicum.shareit.exception.RequestValidationException;
 import ru.practicum.shareit.item.dto.CommentForRequestDto;
 import ru.practicum.shareit.item.dto.CommentForResponseDto;
-import ru.practicum.shareit.item.dto.ItemForRequestDto;
 import ru.practicum.shareit.item.dto.ExtendedItemForResponseDto;
+import ru.practicum.shareit.item.dto.ItemForRequestDto;
+import ru.practicum.shareit.item.dto.ItemForResponseDto;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserService;
 
@@ -20,8 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Primary
 @Service
-@Qualifier("itemServiceDbImpl")
+@RequiredArgsConstructor
 @Slf4j
 public class ItemServiceDbImpl implements ItemService {
     private final ItemRepository itemRepository;
@@ -29,18 +32,6 @@ public class ItemServiceDbImpl implements ItemService {
     private final CommentRepository commentRepository;
     private final UserService userService;
     private final ItemMapper itemMapper;
-
-    public ItemServiceDbImpl(ItemRepository itemRepository,
-                             BookingRepository bookingRepository,
-                             CommentRepository commentRepository,
-                             @Qualifier("userServiceDbImpl") UserService userService,
-                             ItemMapper itemMapper) {
-        this.itemRepository = itemRepository;
-        this.bookingRepository = bookingRepository;
-        this.commentRepository = commentRepository;
-        this.userService = userService;
-        this.itemMapper = itemMapper;
-    }
 
     @Override
     public ExtendedItemForResponseDto findItem(long userId, long id) {
@@ -76,17 +67,17 @@ public class ItemServiceDbImpl implements ItemService {
     }
 
     @Override
-    public Item createNewItem(long userId, ItemForRequestDto itemDto) {
+    public ItemForResponseDto createNewItem(long userId, ItemForRequestDto itemDto) {
         log.debug("+ createNewItem: {}, {}", userId, itemDto);
 
         Item item = itemMapper.itemForRequestDtoToItem(itemDto);
         item.setOwner(userService.findUser(userId));
 
-        return itemRepository.save(item);
+        return itemMapper.itemToItemForResponseDto(itemRepository.save(item));
     }
 
     @Override
-    public Item updateItem(long userId, long id, ItemForRequestDto itemDto) {
+    public ItemForResponseDto updateItem(long userId, long id, ItemForRequestDto itemDto) {
         log.debug("+ updateItem: {}, {}, {}", userId, id, itemDto);
 
         userService.findUser(userId);
@@ -102,24 +93,25 @@ public class ItemServiceDbImpl implements ItemService {
         if (itemDto.getAvailable() != null) {
             targetItem.setAvailable(itemDto.getAvailable());
         }
-        itemRepository.save(targetItem);
 
-        return targetItem;
+        return itemMapper.itemToItemForResponseDto(itemRepository.save(targetItem));
     }
 
     @Override
-    public List<Item> searchItem(long userId, String text) {
+    public List<ItemForResponseDto> searchItem(long userId, String text) {
         userService.findUser(userId);
 
         if (text.isBlank()) {
             return new ArrayList<>();
         }
 
-        return itemRepository.findItemsByNameOrDescription(text);
+        return itemRepository.findItemsByNameOrDescription(text).stream()
+                .map(itemMapper::itemToItemForResponseDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Comment createNewComment(long userId, long itemId, CommentForRequestDto commentDto) {
+    public CommentForResponseDto createNewComment(long userId, long itemId, CommentForRequestDto commentDto) {
         log.debug("+ createNewComment: {}, {}, {}", userId, itemId, commentDto);
 
         Comment comment = itemMapper.commentForRequestDtoToComment(commentDto);
@@ -130,7 +122,7 @@ public class ItemServiceDbImpl implements ItemService {
         comment.setItem(findItem(itemId));
         comment.setCreated(LocalDateTime.now());
 
-        return commentRepository.save(comment);
+        return itemMapper.commentToCommentForResponseDto(commentRepository.save(comment), comment.getAuthor());
     }
 
     private void validateOwner(long userId, Item item) {

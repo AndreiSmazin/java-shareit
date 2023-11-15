@@ -11,8 +11,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     List<Item> findAllByOwnerIdOrderById(long ownerId);
 
-    Item save(Item item);
-
     @Query("select i from Item as i" +
             " where i.available = true " +
             " and (lower(i.name) like lower(concat('%', ?1, '%'))" +
