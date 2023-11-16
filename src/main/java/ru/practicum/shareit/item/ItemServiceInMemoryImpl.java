@@ -21,6 +21,7 @@ public class ItemServiceInMemoryImpl implements ItemService {
     private final UserService userService;
     private final ItemMapper itemMapper;
 
+    @Override
     public ExtendedItemForResponseDto findItem(long userId, long id) {
         userService.findUser(userId);
 
@@ -30,13 +31,15 @@ public class ItemServiceInMemoryImpl implements ItemService {
         return itemMapper.itemToExtendedItemForResponseDto(item);
     }
 
-    public Item findItem(long id) {
+    @Override
+    public Item checkItem(long id) {
         return itemDao.find(id).orElseThrow(() ->
                 new IdNotFoundException(String.format("Item with id %s not exist", id)));
     }
 
+    @Override
     public List<ExtendedItemForResponseDto> findAllItems(long userId) {
-        userService.findUser(userId);
+        userService.checkUser(userId);
 
         List<Item> items = itemDao.findAll(userId);
 
@@ -45,22 +48,23 @@ public class ItemServiceInMemoryImpl implements ItemService {
                 .collect(Collectors.toList());
     }
 
-
+    @Override
     public ItemForResponseDto createNewItem(long userId, ItemForRequestDto itemDto) {
         log.debug("+ createNewItem: {}, {}", userId, itemDto);
 
         Item item = itemMapper.itemForRequestDtoToItem(itemDto);
-        item.setOwner(userService.findUser(userId));
+        item.setOwner(userService.checkUser(userId));
 
         return itemMapper.itemToItemForResponseDto(itemDao.create(item));
     }
 
+    @Override
     public ItemForResponseDto updateItem(long userId, long id, ItemForRequestDto itemDto) {
         log.debug("+ updateItem: {}, {}, {}", userId, id, itemDto);
 
-        userService.findUser(userId);
+        userService.checkUser(userId);
 
-        Item targetItem = findItem(id);
+        Item targetItem = checkItem(id);
         validateOwner(userId, targetItem);
         if (itemDto.getName() != null) {
             targetItem.setName(itemDto.getName());
@@ -76,8 +80,9 @@ public class ItemServiceInMemoryImpl implements ItemService {
         return itemMapper.itemToItemForResponseDto(targetItem);
     }
 
+    @Override
     public List<ItemForResponseDto> searchItem(long userId, String text) {
-        userService.findUser(userId);
+        userService.checkUser(userId);
 
         if (text.isBlank()) {
             return new ArrayList<>();

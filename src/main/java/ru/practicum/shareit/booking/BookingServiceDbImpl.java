@@ -28,7 +28,7 @@ public class BookingServiceDbImpl implements BookingService {
 
     @Override
     public BookingForResponseDto findBooking(long userId, long id) {
-        userService.findUser(userId);
+        userService.checkUser(userId);
 
         Booking booking = bookingRepository.findById(id).orElseThrow(() ->
                 new IdNotFoundException(String.format("Booking with id %s not exist", id)));
@@ -38,14 +38,14 @@ public class BookingServiceDbImpl implements BookingService {
     }
 
     @Override
-    public Booking findBooking(long id) {
+    public Booking checkBooking(long id) {
         return bookingRepository.findById(id).orElseThrow(() ->
                 new IdNotFoundException(String.format("Booking with id %s not exist", id)));
     }
 
     @Override
     public List<BookingForResponseDto> findAllBookingsByUserId(long userId, String state) {
-        userService.findUser(userId);
+        userService.checkUser(userId);
 
         List<Booking> bookings = bookingRepository.findAllByBookerIdOrderByStartDesc(userId);
 
@@ -56,7 +56,7 @@ public class BookingServiceDbImpl implements BookingService {
 
     @Override
     public List<BookingForResponseDto> findAllBookingsByOwnerId(long userId, String state) {
-        userService.findUser(userId);
+        userService.checkUser(userId);
 
         List<Booking> bookings = bookingRepository.findAllByItemOwnerIdOrderByStartDesc(userId);
 
@@ -70,8 +70,8 @@ public class BookingServiceDbImpl implements BookingService {
         log.debug("+ createNewBooking: {}, {}", userId, bookingDto);
 
         Booking booking = new Booking();
-        User booker = userService.findUser(userId);
-        Item item = itemService.findItem(bookingDto.getItemId());
+        User booker = userService.checkUser(userId);
+        Item item = itemService.checkItem(bookingDto.getItemId());
 
         validateBooker(booker, item);
         booking.setBooker(booker);
@@ -92,8 +92,8 @@ public class BookingServiceDbImpl implements BookingService {
     public BookingForResponseDto updateBookingStatus(long userId, long id, boolean approved) {
         log.debug("+ updateBookingStatus: {}, {}, {}", userId, id, approved);
 
-        userService.findUser(userId);
-        Booking booking = findBooking(id);
+        userService.checkUser(userId);
+        Booking booking = checkBooking(id);
         validateOwner(userId, booking);
 
         validateApproved(booking);

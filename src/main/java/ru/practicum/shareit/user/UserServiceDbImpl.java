@@ -6,8 +6,10 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.IdNotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserForResponseDto;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Primary
 @Service
@@ -18,31 +20,41 @@ public class UserServiceDbImpl implements UserService {
     private final UserMapper userMapper;
 
     @Override
-    public User findUser(long id) {
+    public UserForResponseDto findUser(long id) {
+        User user = userRepository.findById(id).orElseThrow(() ->
+                new IdNotFoundException(String.format("User with id %s not exist", id)));
+
+        return userMapper.userToUserForResponseDto(user);
+    }
+
+    @Override
+    public User checkUser(long id) {
         return userRepository.findById(id).orElseThrow(() ->
                 new IdNotFoundException(String.format("User with id %s not exist", id)));
     }
 
     @Override
-    public List<User> findAllUsers() {
-        return userRepository.findAll();
+    public List<UserForResponseDto> findAllUsers() {
+        return userRepository.findAll().stream()
+                .map(userMapper::userToUserForResponseDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public User createNewUser(UserDto userDto) {
+    public UserForResponseDto createNewUser(UserDto userDto) {
         log.debug("+ createNewUser: {}", userDto);
 
         validateEmail(userDto.getEmail());
         User user = userMapper.userDtoToUser(userDto);
 
-        return userRepository.save(user);
+        return userMapper.userToUserForResponseDto(userRepository.save(user));
     }
 
     @Override
-    public User updateUser(long id, UserDto userDto) {
+    public UserForResponseDto updateUser(long id, UserDto userDto) {
         log.debug("+ updateUser: {}, {}", id, userDto);
 
-        User targetUser = findUser(id);
+        User targetUser = checkUser(id);
         if (userDto.getName() != null) {
             targetUser.setName(userDto.getName());
         }
@@ -52,7 +64,7 @@ public class UserServiceDbImpl implements UserService {
             targetUser.setEmail(newEmail);
         }
 
-        return userRepository.save(targetUser);
+        return userMapper.userToUserForResponseDto(userRepository.save(targetUser));
     }
 
     @Override

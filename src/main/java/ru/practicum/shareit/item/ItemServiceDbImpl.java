@@ -35,7 +35,7 @@ public class ItemServiceDbImpl implements ItemService {
 
     @Override
     public ExtendedItemForResponseDto findItem(long userId, long id) {
-        userService.findUser(userId);
+        userService.checkUser(userId);
 
         Item item = itemRepository.findById(id).orElseThrow(() ->
                 new IdNotFoundException(String.format("Item with id %s not exist", id)));
@@ -50,14 +50,14 @@ public class ItemServiceDbImpl implements ItemService {
     }
 
     @Override
-    public Item findItem(long id) {
+    public Item checkItem(long id) {
         return itemRepository.findById(id).orElseThrow(() ->
                 new IdNotFoundException(String.format("Item with id %s not exist", id)));
     }
 
     @Override
     public List<ExtendedItemForResponseDto> findAllItems(long userId) {
-        long ownerId = userService.findUser(userId).getId();
+        long ownerId = userService.checkUser(userId).getId();
 
         return itemRepository.findAllByOwnerIdOrderById(ownerId).stream()
                 .map(itemMapper::itemToExtendedItemForResponseDto)
@@ -71,7 +71,7 @@ public class ItemServiceDbImpl implements ItemService {
         log.debug("+ createNewItem: {}, {}", userId, itemDto);
 
         Item item = itemMapper.itemForRequestDtoToItem(itemDto);
-        item.setOwner(userService.findUser(userId));
+        item.setOwner(userService.checkUser(userId));
 
         return itemMapper.itemToItemForResponseDto(itemRepository.save(item));
     }
@@ -80,9 +80,9 @@ public class ItemServiceDbImpl implements ItemService {
     public ItemForResponseDto updateItem(long userId, long id, ItemForRequestDto itemDto) {
         log.debug("+ updateItem: {}, {}, {}", userId, id, itemDto);
 
-        userService.findUser(userId);
+        userService.checkUser(userId);
 
-        Item targetItem = findItem(id);
+        Item targetItem = checkItem(id);
         validateOwner(userId, targetItem);
         if (itemDto.getName() != null) {
             targetItem.setName(itemDto.getName());
@@ -99,7 +99,7 @@ public class ItemServiceDbImpl implements ItemService {
 
     @Override
     public List<ItemForResponseDto> searchItem(long userId, String text) {
-        userService.findUser(userId);
+        userService.checkUser(userId);
 
         if (text.isBlank()) {
             return new ArrayList<>();
@@ -116,10 +116,10 @@ public class ItemServiceDbImpl implements ItemService {
 
         Comment comment = itemMapper.commentForRequestDtoToComment(commentDto);
 
-        User author = userService.findUser(userId);
+        User author = userService.checkUser(userId);
         validateAuthor(userId);
         comment.setAuthor(author);
-        comment.setItem(findItem(itemId));
+        comment.setItem(checkItem(itemId));
         comment.setCreated(LocalDateTime.now());
 
         return itemMapper.commentToCommentForResponseDto(commentRepository.save(comment), comment.getAuthor());

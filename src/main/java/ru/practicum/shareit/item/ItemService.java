@@ -11,7 +11,7 @@ import java.util.List;
 public interface ItemService {
     ExtendedItemForResponseDto findItem(long userId, long id);
 
-    Item findItem(long id);
+    Item checkItem(long id);
 
     List<ExtendedItemForResponseDto> findAllItems(long userId);
 

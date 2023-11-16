@@ -7,6 +7,7 @@ import ru.practicum.shareit.exception.DuplicateEmailException;
 import ru.practicum.shareit.exception.IdNotFoundException;
 import ru.practicum.shareit.user.dao.UserDao;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserForResponseDto;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,28 +19,42 @@ public class UserServiceInMemoryImpl implements UserService {
     private final UserDao userDao;
     private final UserMapper userMapper;
 
-    public User findUser(long id) {
+    @Override
+    public UserForResponseDto findUser(long id) {
+        User user = userDao.find(id).orElseThrow(() ->
+                new IdNotFoundException(String.format("User with id %s not exist", id)));
+
+        return userMapper.userToUserForResponseDto(user);
+    }
+
+    @Override
+    public User checkUser(long id) {
         return userDao.find(id).orElseThrow(() ->
                 new IdNotFoundException(String.format("User with id %s not exist", id)));
     }
 
-    public List<User> findAllUsers() {
-        return userDao.findAll();
+    @Override
+    public List<UserForResponseDto> findAllUsers() {
+        return userDao.findAll().stream()
+                .map(userMapper::userToUserForResponseDto)
+                .collect(Collectors.toList());
     }
 
-    public User createNewUser(UserDto userDto) {
+    @Override
+    public UserForResponseDto createNewUser(UserDto userDto) {
         log.debug("+ createNewUser: {}", userDto);
 
         validateEmail(userDto.getEmail());
         User user = userMapper.userDtoToUser(userDto);
 
-        return userDao.create(user);
+        return userMapper.userToUserForResponseDto(userDao.create(user));
     }
 
-    public User updateUser(long id, UserDto userDto) {
+    @Override
+    public UserForResponseDto updateUser(long id, UserDto userDto) {
         log.debug("+ updateUser: {}, {}", id, userDto);
 
-        User targetUser = findUser(id);
+        User targetUser = checkUser(id);
         if (userDto.getName() != null) {
             targetUser.setName(userDto.getName());
         }
@@ -50,9 +65,10 @@ public class UserServiceInMemoryImpl implements UserService {
         }
         userDao.update(targetUser);
 
-        return targetUser;
+        return userMapper.userToUserForResponseDto(targetUser);
     }
 
+    @Override
     public void deleteUser(long id) {
         log.debug("+ deleteUser: {}", id);
 
@@ -61,7 +77,7 @@ public class UserServiceInMemoryImpl implements UserService {
 
     private void validateEmail(String email) {
         List<String> emails = findAllUsers().stream()
-                .map(User::getEmail)
+                .map(UserForResponseDto::getEmail)
                 .collect(Collectors.toList());
 
         if (emails.contains(email)) {

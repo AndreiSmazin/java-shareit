@@ -8,7 +8,7 @@ import java.util.List;
 public interface BookingService {
     BookingForResponseDto findBooking(long userId, long id);
 
-    Booking findBooking(long id);
+    Booking checkBooking(long id);
 
     List<BookingForResponseDto> findAllBookingsByUserId(long userId, String state);
 
