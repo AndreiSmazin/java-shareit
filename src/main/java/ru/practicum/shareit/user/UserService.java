@@ -1,71 +1,20 @@
 package ru.practicum.shareit.user;
 
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.DuplicateEmailException;
-import ru.practicum.shareit.exception.IdNotFoundException;
-import ru.practicum.shareit.user.dao.UserDao;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserForResponseDto;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-@Service
-@AllArgsConstructor
-@Slf4j
-public class UserService {
-    private final UserDao userDao;
-    private final UserMapper userMapper;
+public interface UserService {
+    UserForResponseDto findUser(long id);
 
-    public User findUser(long id) {
-        return userDao.find(id).orElseThrow(() ->
-                new IdNotFoundException(String.format("User with id %s not exist", id)));
-    }
+    List<UserForResponseDto> findAllUsers();
 
-    public List<User> findAllUsers() {
-        return userDao.findAll();
-    }
+    UserForResponseDto createNewUser(UserDto userDto);
 
-    public User createNewUser(UserDto userDto) {
-        log.debug("+ createNewUser: {}", userDto);
+    UserForResponseDto updateUser(long id, UserDto userDto);
 
-        validateEmail(userDto.getEmail());
-        User user = userMapper.userDtoToUser(userDto);
+    void deleteUser(long id);
 
-        return userDao.create(user);
-    }
-
-    public User updateUser(long id, UserDto userDto) {
-        log.debug("+ updateUser: {}, {}", id, userDto);
-
-        User targetUser = findUser(id);
-        if (userDto.getName() != null) {
-            targetUser.setName(userDto.getName());
-        }
-        String newEmail = userDto.getEmail();
-        if (newEmail != null && !newEmail.equals(targetUser.getEmail())) {
-            validateEmail(newEmail);
-            targetUser.setEmail(newEmail);
-        }
-        userDao.update(targetUser);
-
-        return targetUser;
-    }
-
-    public void deleteUser(long id) {
-        log.debug("+ deleteUser: {}", id);
-
-        userDao.delete(id);
-    }
-
-    private void validateEmail(String email) {
-        List<String> emails = findAllUsers().stream()
-                .map(User::getEmail)
-                .collect(Collectors.toList());
-
-        if (emails.contains(email)) {
-            throw new DuplicateEmailException(String.format("User with email %s is already exists", email));
-        }
-    }
+    User checkUser(long id);
 }

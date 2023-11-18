@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class Violation {
+public class ValidationViolation {
     private final String fieldName;
     private final String massage;
 }

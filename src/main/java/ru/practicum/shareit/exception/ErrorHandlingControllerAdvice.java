@@ -2,6 +2,7 @@ package ru.practicum.shareit.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -18,49 +19,70 @@ public class ErrorHandlingControllerAdvice {
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public List<Violation> onConstraintViolationException(ConstraintViolationException e) {
-        e.getConstraintViolations().forEach(error -> log.debug("Validation error: incorrect value" +
+    public List<ValidationViolation> onConstraintViolationException(ConstraintViolationException e) {
+        e.getConstraintViolations().forEach(error -> log.error("Validation error: incorrect value" +
                 " '{}' of {}, {}", error.getInvalidValue(), getFieldName(error), error.getMessage()));
 
         return e.getConstraintViolations().stream()
-                .map(error -> new Violation(getFieldName(error), error.getMessage()))
+                .map(error -> new ValidationViolation(getFieldName(error), error.getMessage()))
+                .collect(Collectors.toList());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public List<ValidationViolation> onMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        e.getBindingResult().getFieldErrors().forEach(error -> log.error("Validation error: incorrect value '{}'" +
+                " of {}, {}", error.getRejectedValue(), error.getObjectName(), error.getDefaultMessage()));
+
+        return e.getBindingResult().getFieldErrors().stream()
+                .map(error -> new ValidationViolation(error.getField(), error.getDefaultMessage()))
                 .collect(Collectors.toList());
     }
 
     @ExceptionHandler(DuplicateEmailException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     @ResponseBody
-    public Violation onDuplicateEmailException(DuplicateEmailException e) {
+    public ExceptionViolation onDuplicateEmailException(DuplicateEmailException e) {
         log.error("Validation error: incorrect email, {}", e.getMessage());
 
-        return new Violation("email", e.getMessage());
+        return new ExceptionViolation(e.getMessage());
     }
 
     @ExceptionHandler(IdNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
-    public Violation onIdNotFoundException(IdNotFoundException e) {
+    public ExceptionViolation onIdNotFoundException(IdNotFoundException e) {
         log.error("IdNotFoundException: {}", e.getMessage());
 
-        return new Violation("id", e.getMessage());
+        return new ExceptionViolation(e.getMessage());
     }
 
     @ExceptionHandler(AccessNotAllowedException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
-    public Violation onAccessNotAllowedException(AccessNotAllowedException e) {
+    public ExceptionViolation onAccessNotAllowedException(AccessNotAllowedException e) {
         log.error("AccessNotAllowedException: {}", e.getMessage());
 
-        return new Violation("userId", e.getMessage());
+        return new ExceptionViolation(e.getMessage());
+    }
+
+    @ExceptionHandler(RequestValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ExceptionViolation onRequestValidationException(RequestValidationException e) {
+        log.error("RequestValidationException: {}", e.getMessage());
+
+        return new ExceptionViolation(e.getMessage());
     }
 
     @ExceptionHandler(Throwable.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
-    public String onThrowable(Throwable e) {
+    public ExceptionViolation onThrowable(Throwable e) {
         log.error("Unpredictable error: {}", e.getMessage());
 
-        return e.getMessage();
+        return new ExceptionViolation(e.getMessage());
     }
 
     private String getFieldName(ConstraintViolation constraintViolation) {
