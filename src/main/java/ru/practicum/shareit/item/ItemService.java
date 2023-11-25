@@ -13,13 +13,13 @@ public interface ItemService {
 
     Item checkItem(long id);
 
-    List<ExtendedItemForResponseDto> findAllItems(long userId);
+    List<ExtendedItemForResponseDto> findAllItems(long userId, int from, int size);
 
     ItemForResponseDto createNewItem(long userId, ItemForRequestDto itemDto);
 
     ItemForResponseDto updateItem(long userId, long id, ItemForRequestDto itemDto);
 
-    List<ItemForResponseDto> searchItem(long userId, String text);
+    List<ItemForResponseDto> searchItem(long userId, String text, int from, int size);
 
     CommentForResponseDto createNewComment(long userId, long itemId, CommentForRequestDto commentDto);
 }

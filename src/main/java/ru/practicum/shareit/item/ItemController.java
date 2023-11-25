@@ -20,6 +20,8 @@ import ru.practicum.shareit.item.dto.ItemForResponseDto;
 import ru.practicum.shareit.user.Marker;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 @Validated
@@ -36,14 +38,18 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ExtendedItemForResponseDto> findAll(@RequestHeader("X-Sharer-User-Id") long userId) {
-        return itemService.findAllItems(userId);
+    public List<ExtendedItemForResponseDto> findAll(@RequestHeader("X-Sharer-User-Id") long userId,
+                                                    @RequestParam(defaultValue = "0") @Min(0) int from,
+                                                    @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
+        return itemService.findAllItems(userId, from, size);
     }
 
     @GetMapping("/search")
     public List<ItemForResponseDto> search(@RequestHeader("X-Sharer-User-Id") long userId,
+                                           @RequestParam(defaultValue = "0") @Min(0) int from,
+                                           @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size,
                                            @RequestParam String text) {
-        return itemService.searchItem(userId, text);
+        return itemService.searchItem(userId, text, from, size);
     }
 
     @PostMapping

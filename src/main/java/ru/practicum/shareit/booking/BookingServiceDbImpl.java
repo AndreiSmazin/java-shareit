@@ -44,24 +44,30 @@ public class BookingServiceDbImpl implements BookingService {
     }
 
     @Override
-    public List<BookingForResponseDto> findAllBookingsByUserId(long userId, String state) {
+    public List<BookingForResponseDto> findAllBookingsByUserId(long userId, String state, int from, int size) {
         userService.checkUser(userId);
 
-        List<Booking> bookings = bookingRepository.findAllByBookerIdOrderByStartDesc(userId);
+        List<Booking> bookings = bookingRepository
+                .findAllByBookerIdOrderByStartDesc(userId);
 
         return filterBookingsByState(bookings, state).stream()
                 .map(bookingMapper::bookingToBookingForResponseDto)
+                .skip(from)
+                .limit(size)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<BookingForResponseDto> findAllBookingsByOwnerId(long userId, String state) {
+    public List<BookingForResponseDto> findAllBookingsByOwnerId(long userId, String state, int from, int size) {
         userService.checkUser(userId);
 
-        List<Booking> bookings = bookingRepository.findAllByItemOwnerIdOrderByStartDesc(userId);
+        List<Booking> bookings = bookingRepository
+                .findAllByItemOwnerIdOrderByStartDesc(userId);
 
         return filterBookingsByState(bookings, state).stream()
                 .map(bookingMapper::bookingToBookingForResponseDto)
+                .skip(from)
+                .limit(size)
                 .collect(Collectors.toList());
     }
 

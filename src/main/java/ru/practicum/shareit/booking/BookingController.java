@@ -16,6 +16,8 @@ import ru.practicum.shareit.booking.dto.BookingForRequestDto;
 import ru.practicum.shareit.booking.dto.BookingForResponseDto;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -26,7 +28,6 @@ import java.util.List;
 @Slf4j
 public class BookingController {
     private final BookingService bookingService;
-    private final BookingMapper bookingMapper;
 
     @GetMapping("/{id}")
     public BookingForResponseDto find(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long id) {
@@ -35,14 +36,18 @@ public class BookingController {
 
     @GetMapping
     public List<BookingForResponseDto> findAllForUser(@RequestHeader("X-Sharer-User-Id") long userId,
+                                                      @RequestParam(defaultValue = "0") @Min(0) int from,
+                                                      @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size,
                                                       @RequestParam(defaultValue = "ALL") String state) {
-        return bookingService.findAllBookingsByUserId(userId, state);
+        return bookingService.findAllBookingsByUserId(userId, state, from, size);
     }
 
     @GetMapping("/owner")
     public List<BookingForResponseDto> findAllForOwner(@RequestHeader("X-Sharer-User-Id") long userId,
+                                                       @RequestParam(defaultValue = "0") @Min(0) int from,
+                                                       @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size,
                                                        @RequestParam(defaultValue = "ALL") String state) {
-        return bookingService.findAllBookingsByOwnerId(userId, state);
+        return bookingService.findAllBookingsByOwnerId(userId, state, from, size);
     }
 
     @PostMapping

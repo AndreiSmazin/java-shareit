@@ -38,7 +38,7 @@ public class ItemServiceInMemoryImpl implements ItemService {
     }
 
     @Override
-    public List<ExtendedItemForResponseDto> findAllItems(long userId) {
+    public List<ExtendedItemForResponseDto> findAllItems(long userId, int from, int size) {
         userService.checkUser(userId);
 
         List<Item> items = itemDao.findAll(userId);
@@ -81,7 +81,7 @@ public class ItemServiceInMemoryImpl implements ItemService {
     }
 
     @Override
-    public List<ItemForResponseDto> searchItem(long userId, String text) {
+    public List<ItemForResponseDto> searchItem(long userId, String text, int from, int size) {
         userService.checkUser(userId);
 
         if (text.isBlank()) {
