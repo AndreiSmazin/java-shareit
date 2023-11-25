@@ -14,6 +14,7 @@ import ru.practicum.shareit.item.dto.CommentForResponseDto;
 import ru.practicum.shareit.item.dto.ExtendedItemForResponseDto;
 import ru.practicum.shareit.item.dto.ItemForRequestDto;
 import ru.practicum.shareit.item.dto.ItemForResponseDto;
+import ru.practicum.shareit.request.ItemRequestService;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserService;
 
@@ -32,6 +33,7 @@ public class ItemServiceDbImpl implements ItemService {
     private final CommentRepository commentRepository;
     private final UserService userService;
     private final ItemMapper itemMapper;
+    private final ItemRequestService itemRequestService;
 
     @Override
     public ExtendedItemForResponseDto findItem(long userId, long id) {
@@ -70,6 +72,10 @@ public class ItemServiceDbImpl implements ItemService {
     public ItemForResponseDto createNewItem(long userId, ItemForRequestDto itemDto) {
         log.debug("+ createNewItem: {}, {}", userId, itemDto);
 
+        if (itemDto.getRequestId() != null) {
+            itemRequestService.checkItemRequest(itemDto.getRequestId());
+        }
+
         Item item = itemMapper.itemForRequestDtoToItem(itemDto);
         item.setOwner(userService.checkUser(userId));
 
@@ -92,6 +98,10 @@ public class ItemServiceDbImpl implements ItemService {
         }
         if (itemDto.getAvailable() != null) {
             targetItem.setAvailable(itemDto.getAvailable());
+        }
+        if (itemDto.getRequestId() != null) {
+            itemRequestService.checkItemRequest(itemDto.getRequestId());
+            targetItem.setRequestId(itemDto.getRequestId());
         }
 
         return itemMapper.itemToItemForResponseDto(itemRepository.save(targetItem));

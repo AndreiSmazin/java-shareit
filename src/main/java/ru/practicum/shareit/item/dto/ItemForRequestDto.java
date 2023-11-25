@@ -16,4 +16,5 @@ public class ItemForRequestDto {
     private String description;
     @NotNull(groups = Marker.OnCreate.class)
     private Boolean available;
+    private Long requestId;
 }
