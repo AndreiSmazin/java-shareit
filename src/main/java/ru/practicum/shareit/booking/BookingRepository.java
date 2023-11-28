@@ -10,9 +10,9 @@ import java.util.Optional;
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     Optional<Booking> findById(long id);
 
-    List<Booking> findAllByBookerIdOrderByStartDesc(Long id);
+    List<Booking> findAllByBookerIdOrderByStartDesc(long id);
 
-    List<Booking> findAllByItemOwnerIdOrderByStartDesc(Long id);
+    List<Booking> findAllByItemOwnerIdOrderByStartDesc(long id);
 
     @Query("select new ru.practicum.shareit.booking.dto.BookingForItemDto(b.id, br.id) from Booking as b" +
             " join b.item as i" +
@@ -21,7 +21,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             " and b.status = 'APPROVED'" +
             " and b.start < current_timestamp" +
             " order by b.end desc")
-    List<BookingForItemDto> findPastBookingsOfItem(Long id);
+    List<BookingForItemDto> findPastBookingsOfItem(long id);
 
     @Query("select new ru.practicum.shareit.booking.dto.BookingForItemDto(b.id, br.id) from Booking as b" +
             " join b.item as i" +
@@ -30,12 +30,14 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             " and b.status = 'APPROVED'" +
             " and b.start > current_timestamp" +
             " order by b.end")
-    List<BookingForItemDto> findFutureBookingsOfItem(Long id);
+    List<BookingForItemDto> findFutureBookingsOfItem(long id);
 
     @Query("select count(b) from Booking as b" +
             " join b.booker as br" +
+            " join b.item as i" +
             " where br.id = ?1" +
+            " and i.id = ?2" +
             " and b.status = 'APPROVED'" +
             " and b.end < current_timestamp")
-    int findCountBookingsOfUser(Long id);
+    int findCountBookingsOfUser(long userId, long itemId);
 }

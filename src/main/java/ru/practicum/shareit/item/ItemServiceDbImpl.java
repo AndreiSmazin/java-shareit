@@ -128,7 +128,7 @@ public class ItemServiceDbImpl implements ItemService {
         Comment comment = itemMapper.commentForRequestDtoToComment(commentDto);
 
         User author = userService.checkUser(userId);
-        validateAuthor(userId);
+        validateAuthor(userId, itemId);
         comment.setAuthor(author);
         comment.setItem(checkItem(itemId));
         comment.setCreated(LocalDateTime.now());
@@ -142,9 +142,10 @@ public class ItemServiceDbImpl implements ItemService {
         }
     }
 
-    private void validateAuthor(long userId) {
-        if (bookingRepository.findCountBookingsOfUser(userId) == 0) {
-            throw new RequestValidationException(String.format("User %s does not have completed bookings", userId));
+    private void validateAuthor(long userId, long itemId) {
+        if (bookingRepository.findCountBookingsOfUser(userId, itemId) == 0) {
+            throw new RequestValidationException(String.format("User %s does not have completed bookings of" +
+                    " item %s", userId, itemId));
         }
     }
 

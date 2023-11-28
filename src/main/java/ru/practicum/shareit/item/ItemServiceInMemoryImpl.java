@@ -6,7 +6,11 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.AccessNotAllowedException;
 import ru.practicum.shareit.exception.IdNotFoundException;
 import ru.practicum.shareit.item.dao.ItemDao;
-import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.dto.CommentForRequestDto;
+import ru.practicum.shareit.item.dto.CommentForResponseDto;
+import ru.practicum.shareit.item.dto.ExtendedItemForResponseDto;
+import ru.practicum.shareit.item.dto.ItemForRequestDto;
+import ru.practicum.shareit.item.dto.ItemForResponseDto;
 import ru.practicum.shareit.user.UserService;
 
 import java.util.ArrayList;
