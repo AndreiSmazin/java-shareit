@@ -22,8 +22,8 @@ public class ItemRequestRepositoryTest {
     void shouldReturnAllRequestsExcludingUsers() throws Exception {
         final List<Long> expectedRequests = List.of(5L, 3L, 2L);
 
-        final List<Long> requests = itemRequestRepository.
-                findAllFromOtherUsers(3L, PageRequest.of(0, 20)).stream()
+        final List<Long> requests = itemRequestRepository
+                .findAllFromOtherUsers(3L, PageRequest.of(0, 20)).stream()
                 .map(ItemRequest::getId)
                 .collect(Collectors.toList());
 
@@ -36,8 +36,8 @@ public class ItemRequestRepositoryTest {
     void shouldReturnAllRequestsOfUser() throws Exception {
         final List<Long> expectedRequests = List.of(4L, 1L);
 
-        final List<Long> requests = itemRequestRepository.
-                findAllByRequesterIdOrderByCreatedDesc(3L).stream()
+        final List<Long> requests = itemRequestRepository
+                .findAllByRequesterIdOrderByCreatedDesc(3L).stream()
                 .map(ItemRequest::getId)
                 .collect(Collectors.toList());
 

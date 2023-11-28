@@ -34,8 +34,8 @@ public class ItemRequestServiceDbImpl implements ItemRequestService {
         ItemRequest itemRequest = itemRequestRepository.findById(id).orElseThrow(() ->
                 new IdNotFoundException(String.format("ItemRequest with id %s not exist", id)));
 
-        ExtendedItemRequestForResponseDto itemRequestDto = itemRequestMapper.
-                itemRequestToExtendedItemRequestForResponseDto(itemRequest);
+        ExtendedItemRequestForResponseDto itemRequestDto = itemRequestMapper
+                .itemRequestToExtendedItemRequestForResponseDto(itemRequest);
         addItems(itemRequestDto);
 
         return itemRequestDto;

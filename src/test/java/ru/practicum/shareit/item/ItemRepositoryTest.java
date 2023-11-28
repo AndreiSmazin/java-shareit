@@ -22,7 +22,8 @@ public class ItemRepositoryTest {
     void shouldReturnAllItemsByOwnerId() throws Exception {
         final List<Long> expectedItemsIds = List.of(1L, 3L, 4L);
 
-        final List<Long> itemsIds = itemRepository.findAllByOwnerIdOrderById(1L, PageRequest.of(0, 20)).stream()
+        final List<Long> itemsIds = itemRepository
+                .findAllByOwnerIdOrderById(1L, PageRequest.of(0, 20)).stream()
                 .map(Item::getId)
                 .collect(Collectors.toList());
 
@@ -35,8 +36,8 @@ public class ItemRepositoryTest {
     void shouldReturnAllItemsByNameOrDescription() throws Exception {
         final List<Long> expectedItemsIdsForName = List.of(1L, 2L);
 
-        final List<Long> itemsIdsForName = itemRepository.
-                findItemsByNameOrDescription("Дрель", PageRequest.of(0, 20)).stream()
+        final List<Long> itemsIdsForName = itemRepository
+                .findItemsByNameOrDescription("Дрель", PageRequest.of(0, 20)).stream()
                 .map(Item::getId)
                 .collect(Collectors.toList());
 
@@ -45,8 +46,8 @@ public class ItemRepositoryTest {
 
         final List<Long> expectedItemsIdsForDescription = List.of(5L);
 
-        final List<Long> itemsIdsForDescription = itemRepository.
-                findItemsByNameOrDescription("для плотной ткани", PageRequest.of(0, 20)).stream()
+        final List<Long> itemsIdsForDescription = itemRepository
+                .findItemsByNameOrDescription("для плотной ткани", PageRequest.of(0, 20)).stream()
                 .map(Item::getId)
                 .collect(Collectors.toList());
 
