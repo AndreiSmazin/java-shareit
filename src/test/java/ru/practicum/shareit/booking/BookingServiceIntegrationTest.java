@@ -20,12 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 @AutoConfigureTestDatabase
 public class BookingServiceIntegrationTest {
-    private BookingService bookingService;
-
     @Autowired
-    public BookingServiceIntegrationTest(BookingServiceDbImpl bookingService) {
-        this.bookingService = bookingService;
-    }
+    private BookingService bookingService;
 
     @Test
     @DisplayName("Method findBooking(long userId, long id) should return expected Booking")

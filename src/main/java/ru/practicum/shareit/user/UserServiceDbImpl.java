@@ -44,7 +44,6 @@ public class UserServiceDbImpl implements UserService {
     public UserForResponseDto createNewUser(UserDto userDto) {
         log.debug("+ createNewUser: {}", userDto);
 
-        validateEmail(userDto.getEmail());
         User user = userMapper.userDtoToUser(userDto);
 
         return userMapper.userToUserForResponseDto(userRepository.save(user));
@@ -60,7 +59,6 @@ public class UserServiceDbImpl implements UserService {
         }
         String newEmail = userDto.getEmail();
         if (newEmail != null && !newEmail.equals(targetUser.getEmail())) {
-            validateEmail(newEmail);
             targetUser.setEmail(newEmail);
         }
 
@@ -72,12 +70,5 @@ public class UserServiceDbImpl implements UserService {
         log.debug("+ deleteUser: {}", id);
 
         userRepository.deleteById(id);
-    }
-
-    private void validateEmail(String email) {
-        if (userRepository.findByEmail(email).isPresent()) {
-            //  Код ниже закоментил чтобы тесты Postman выполнялись
-            //throw new DuplicateEmailException(String.format("User with email %s is already exists", email));
-        }
     }
 }

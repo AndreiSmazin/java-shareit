@@ -24,12 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 @AutoConfigureTestDatabase
 public class ItemServiceIntegrationTest {
-    private ItemService itemService;
-
     @Autowired
-    public ItemServiceIntegrationTest(ItemServiceDbImpl itemService) {
-        this.itemService = itemService;
-    }
+    private ItemService itemService;
 
     @Test
     @DisplayName("Method findItem(long userId, long id) should return expected item")

@@ -40,15 +40,6 @@ public class ErrorHandlingControllerAdvice {
                 .collect(Collectors.toList());
     }
 
-    @ExceptionHandler(DuplicateEmailException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    @ResponseBody
-    public ExceptionViolation onDuplicateEmailException(DuplicateEmailException e) {
-        log.error("Validation error: incorrect email, {}", e.getMessage());
-
-        return new ExceptionViolation(e.getMessage());
-    }
-
     @ExceptionHandler(IdNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
