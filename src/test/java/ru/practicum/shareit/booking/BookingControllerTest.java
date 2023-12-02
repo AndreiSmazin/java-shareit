@@ -252,8 +252,8 @@ public class BookingControllerTest {
     void shouldNotCreateNewBookingWithWrongDates() throws Exception {
         final BookingForRequestDto bookingDto1 = BookingForRequestDto.builder()
                 .itemId(1L)
-                .start(LocalDateTime.parse("2022-11-30T20:00:00"))
-                .end(LocalDateTime.parse("2022-12-02T20:00:00"))
+                .start(LocalDateTime.parse("2023-11-30T20:00:00"))
+                .end(LocalDateTime.parse("2023-12-02T20:00:00"))
                 .build();
         final List<ValidationViolation> errorResponse1 = List.of(
                 new ValidationViolation("start", "must be a date in the present or in the future"),
@@ -269,15 +269,15 @@ public class BookingControllerTest {
 
         final BookingForRequestDto bookingDto2 = BookingForRequestDto.builder()
                 .itemId(1L)
-                .start(LocalDateTime.parse("2023-12-12T20:00:00"))
-                .end(LocalDateTime.parse("2023-12-02T20:00:00"))
+                .start(LocalDateTime.parse("2024-12-12T20:00:00"))
+                .end(LocalDateTime.parse("2024-12-02T20:00:00"))
                 .build();
-        final ExceptionViolation errorResponse2 = new ExceptionViolation("End booking date 2023-12-02T20:00:00" +
-                " can`t be earlier than start date 2023-12-12T20:00:00");
+        final ExceptionViolation errorResponse2 = new ExceptionViolation("End booking date 2024-12-02T20:00:00" +
+                " can`t be earlier than start date 2024-12-12T20:00:00");
 
         Mockito.when(bookingService.createNewBooking(1L, bookingDto2)).thenThrow(
-                new RequestValidationException("End booking date 2023-12-02T20:00:00 can`t be earlier than start date" +
-                        " 2023-12-12T20:00:00"));
+                new RequestValidationException("End booking date 2024-12-02T20:00:00 can`t be earlier than start date" +
+                        " 2024-12-12T20:00:00"));
 
         mockMvc.perform(MockMvcRequestBuilders.post("/bookings")
                         .header("X-Sharer-User-Id", 1)
