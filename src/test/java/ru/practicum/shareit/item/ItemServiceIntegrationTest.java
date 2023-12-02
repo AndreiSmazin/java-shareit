@@ -16,10 +16,10 @@ import ru.practicum.shareit.item.dto.ItemForRequestDto;
 import ru.practicum.shareit.item.dto.ItemForResponseDto;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -96,15 +96,23 @@ public class ItemServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("Method findItem(long userId, long id) should throw IdNotFoundException when User is not found")
+    @DisplayName("Method findItem(long userId, long id) should throw IdNotFoundException when Item or User is not" +
+            " found")
     void shouldThrowExceptionWhenItemNotFound() throws Exception {
-        final String expectedMessage = "Item with id 100 not exist";
+        final String itemExpectedMessage = "Item with id 100 not exist";
+        final String userExpectedMessage = "User with id 100 not exist";
 
-        final IdNotFoundException e = assertThrows(
+        final IdNotFoundException itemException = assertThrows(
                 IdNotFoundException.class,
                 () -> itemService.findItem(1L, 100L));
+        final IdNotFoundException userException = assertThrows(
+                IdNotFoundException.class,
+                () -> itemService.findItem(100L, 1L));
 
-        assertEquals(expectedMessage, e.getMessage(), "Exception massage and expectedMassage is not match");
+        assertEquals(itemExpectedMessage, itemException.getMessage(), "Exception massage and expectedMassage" +
+                " is not match");
+        assertEquals(userExpectedMessage, userException.getMessage(), "Exception massage and expectedMassage" +
+                " is not match");
     }
 
     @Test
@@ -184,5 +192,94 @@ public class ItemServiceIntegrationTest {
                 () -> itemService.createNewComment(4L, 2L, commentDto));
 
         assertEquals(expectedMessage, e.getMessage(), "Exception massage and expectedMassage is not match");
+    }
+
+    @Test
+    @DisplayName("Method findAllItems(long userId, int from, int size) should return correct list of Items")
+    void shouldReturnItems() throws Exception {
+        final ExtendedItemForResponseDto expectedItem1 = ExtendedItemForResponseDto.builder()
+                .id(1)
+                .name("Дрель ударная Bosh")
+                .description("Мощность 7000W")
+                .available(true)
+                .lastBooking(null)
+                .nextBooking(null)
+                .comments(new ArrayList<>())
+                .build();
+        final List<CommentForResponseDto> expectedItem2Comments = List.of(
+                CommentForResponseDto.builder()
+                        .id(1)
+                        .text("Брали для похода по Ладоге. Спасибо, не подвела!")
+                        .authorName("Алена Васина")
+                        .created(LocalDateTime.parse("2023-08-10T00:00:00"))
+                        .build(),
+                CommentForResponseDto.builder()
+                        .id(2)
+                        .text("На трехместной самое то вдвоём с грузом")
+                        .authorName("Сергей Иванов")
+                        .created(LocalDateTime.parse("2023-07-02T00:00:00"))
+                        .build());
+        final ExtendedItemForResponseDto expectedItem2 = ExtendedItemForResponseDto.builder()
+                .id(3)
+                .name("Байдарка трёхместная Ладога")
+                .description("2003г.в. в отличном состоянии, весла отсутствуют")
+                .available(true)
+                .lastBooking(BookingForItemDto.builder()
+                        .id(1L)
+                        .bookerId(4L)
+                        .build())
+                .nextBooking(BookingForItemDto.builder()
+                        .id(3L)
+                        .bookerId(2L)
+                        .build())
+                .comments(expectedItem2Comments)
+                .build();
+        final ExtendedItemForResponseDto expectedItem3 = ExtendedItemForResponseDto.builder()
+                .id(4)
+                .name("Набор походных котелков")
+                .description("3 штуки: 3, 4, 5 литров")
+                .available(true)
+                .lastBooking(null)
+                .nextBooking(null)
+                .comments(new ArrayList<>())
+                .build();
+        final List<ExtendedItemForResponseDto> expectedItems = List.of(expectedItem1, expectedItem2, expectedItem3);
+
+        final List<ExtendedItemForResponseDto> items = itemService.findAllItems(1L, 0, 20);
+
+        assertEquals(expectedItems, items, "Items and expectedItems is not match");
+    }
+
+    @Test
+    @DisplayName("Method searchItem(long userId, String text, int from, int size) should return correct list of Items")
+    void shouldSearchItems() throws Exception {
+        final ItemForResponseDto expectedItem1 = ItemForResponseDto.builder()
+                .id(1)
+                .name("Дрель ударная Bosh")
+                .description("Мощность 7000W")
+                .available(true)
+                .requestId(null)
+                .build();
+        final ItemForResponseDto expectedItem2 = ItemForResponseDto.builder()
+                .id(2)
+                .name("Дрель аккумуляторная")
+                .description("В комплекте запасной аккумулятор и набор бит")
+                .available(true)
+                .requestId(null)
+                .build();
+        final List<ItemForResponseDto> expectedItems = List.of(expectedItem1, expectedItem2);
+
+        final List<ItemForResponseDto> items = itemService.searchItem(2L, "дрель", 0, 20);
+
+        assertEquals(expectedItems, items, "Items and expectedItems is not match");
+    }
+
+    @Test
+    @DisplayName("Method searchItem(long userId, String text, int from, int size) should return empty list of Items" +
+            " when Items not searched")
+    void shouldReturnEmptyListWhenItemsNotSearched() throws Exception {
+        final List<ItemForResponseDto> items = itemService.searchItem(2L, "фофудья", 0, 20);
+
+        assertTrue(items.isEmpty(), "Items list is not empty");
     }
 }
