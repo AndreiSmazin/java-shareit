@@ -216,8 +216,8 @@ public class BookingControllerTest {
     void shouldCreateNewBooking() throws Exception {
         final BookingForRequestDto bookingDto = BookingForRequestDto.builder()
                 .itemId(1L)
-                .start(LocalDateTime.parse("2023-11-30T20:00:00"))
-                .end(LocalDateTime.parse("2023-12-02T20:00:00"))
+                .start(LocalDateTime.parse("2023-12-30T20:00:00"))
+                .end(LocalDateTime.parse("2024-01-02T20:00:00"))
                 .build();
         final UserForBookingDto testBooker = UserForBookingDto.builder()
                 .id(1L)
