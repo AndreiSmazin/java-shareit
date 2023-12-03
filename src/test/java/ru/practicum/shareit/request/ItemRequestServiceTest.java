@@ -1,5 +1,6 @@
 package ru.practicum.shareit.request;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -109,5 +110,41 @@ public class ItemRequestServiceTest {
         final ItemRequestForResponseDto createdRequest = itemRequestService.createNewItemRequest(3L, requestDto);
 
         assertEquals(expectedRequest, createdRequest, "createdRequest and expectedRequest is not match");
+    }
+
+    @Test
+    @DisplayName("Methods findItemRequestById, findItemRequestsByUserId, findAllItemRequests and createNewItemRequest" +
+            " should throw IdNotFoundException when User is not found")
+    void shouldThrowExceptionWhenUserNotExists() throws Exception {
+        final String expectedMessage = "User with id 100 not exist";
+
+        Mockito.when(userService.checkUser(100L)).thenThrow(new IdNotFoundException("User with id 100 not exist"));
+
+        final Exception findItemRequestByIdException = Assertions.assertThrows(IdNotFoundException.class, () ->
+                itemRequestService.findItemRequestById(100L, 1L));
+
+        Assertions.assertEquals(expectedMessage, findItemRequestByIdException.getMessage(), "Exception massage and" +
+                " expectedMassage is not match");
+
+        final Exception findItemRequestsByUserIdException = Assertions.assertThrows(IdNotFoundException.class, () ->
+                itemRequestService.findItemRequestsByUserId(100L));
+
+        Assertions.assertEquals(expectedMessage, findItemRequestsByUserIdException.getMessage(), "Exception massage and" +
+                " expectedMassage is not match");
+
+        final Exception findAllItemRequestsException = Assertions.assertThrows(IdNotFoundException.class, () ->
+                itemRequestService.findAllItemRequests(100L, 0, 20));
+
+        Assertions.assertEquals(expectedMessage, findAllItemRequestsException.getMessage(), "Exception massage and" +
+                " expectedMassage is not match");
+
+        final ItemRequestDto requestDto = ItemRequestDto.builder()
+                .description("Нужно осветительное оборудование для съемки клипа")
+                .build();
+        final Exception createNewItemRequestException = Assertions.assertThrows(IdNotFoundException.class, () ->
+                itemRequestService.createNewItemRequest(100L, requestDto));
+
+        Assertions.assertEquals(expectedMessage, createNewItemRequestException.getMessage(), "Exception massage and" +
+                " expectedMassage is not match");
     }
 }

@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -257,5 +258,49 @@ public class BookingServiceTest {
                 bookingService.createNewBooking(4L, bookingDto));
 
         assertEquals(expectedMessage, e.getMessage(), "Exception massage and expectedMassage is not match");
+    }
+
+    @Test
+    @DisplayName("Methods findBooking, findAllBookingsByUserId, findAllBookingsByOwnerId, createNewBooking and" +
+            " updateBookingStatus should throw IdNotFoundException when User is not found")
+    void shouldThrowExceptionWhenUserNotExists() throws Exception {
+        final String expectedMessage = "User with id 100 not exist";
+
+        Mockito.when(userService.checkUser(100L)).thenThrow(new IdNotFoundException("User with id 100 not exist"));
+
+        final Exception findBookingException = Assertions.assertThrows(IdNotFoundException.class, () ->
+                bookingService.findBooking(100L, 1L));
+
+        Assertions.assertEquals(expectedMessage, findBookingException.getMessage(), "Exception massage and" +
+                " expectedMassage is not match");
+
+        final Exception findAllBookingsByUserIdException = Assertions.assertThrows(IdNotFoundException.class, () ->
+                bookingService.findAllBookingsByUserId(100L, "ALL", 0, 20));
+
+        Assertions.assertEquals(expectedMessage, findAllBookingsByUserIdException.getMessage(), "Exception" +
+                " massage and expectedMassage is not match");
+
+        final Exception findAllBookingsByOwnerIdException = Assertions.assertThrows(IdNotFoundException.class, () ->
+                bookingService.findAllBookingsByOwnerId(100L, "ALL", 0, 20));
+
+        Assertions.assertEquals(expectedMessage, findAllBookingsByOwnerIdException.getMessage(), "Exception" +
+                " massage and expectedMassage is not match");
+
+        final BookingForRequestDto bookingDto = BookingForRequestDto.builder()
+                .start(LocalDateTime.parse("2023-08-10T00:00:00"))
+                .end(LocalDateTime.parse("2023-08-01T00:00:00"))
+                .itemId(3L)
+                .build();
+        final Exception createNewBookingException = Assertions.assertThrows(IdNotFoundException.class, () ->
+                bookingService.createNewBooking(100L, bookingDto));
+
+        Assertions.assertEquals(expectedMessage, createNewBookingException.getMessage(), "Exception massage and" +
+                " expectedMassage is not match");
+
+        final Exception updateBookingStatusException = Assertions.assertThrows(IdNotFoundException.class, () ->
+                bookingService.updateBookingStatus(100L, 1L, true));
+
+        Assertions.assertEquals(expectedMessage, updateBookingStatusException.getMessage(), "Exception massage and" +
+                " expectedMassage is not match");
     }
 }

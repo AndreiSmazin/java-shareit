@@ -10,6 +10,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.exception.IdNotFoundException;
+import ru.practicum.shareit.item.dto.CommentForRequestDto;
 import ru.practicum.shareit.item.dto.ItemForRequestDto;
 import ru.practicum.shareit.item.dto.ItemForResponseDto;
 import ru.practicum.shareit.request.ItemRequest;
@@ -133,5 +134,59 @@ public class ItemServiceTest {
         final List<ItemForResponseDto> items = itemService.searchItem(3L, "", 0, 20);
 
         Assertions.assertTrue(items.isEmpty(), "Items list is not empty");
+    }
+
+    @Test
+    @DisplayName("Methods findItem, findAllItems, createNewItem, updateItem, searchItem and createNewComment should" +
+            " throw IdNotFoundException when User is not found")
+    void shouldThrowExceptionWhenUserNotExists() throws Exception {
+        final String expectedMessage = "User with id 100 not exist";
+
+        Mockito.when(userService.checkUser(100L)).thenThrow(new IdNotFoundException("User with id 100 not exist"));
+
+        final Exception findItemException = Assertions.assertThrows(IdNotFoundException.class, () ->
+                itemService.findItem(100L, 1L));
+
+        Assertions.assertEquals(expectedMessage, findItemException.getMessage(), "Exception massage and" +
+                " expectedMassage is not match");
+
+        final Exception findAllItemsException = Assertions.assertThrows(IdNotFoundException.class, () ->
+                itemService.findAllItems(100L, 0, 20));
+
+        Assertions.assertEquals(expectedMessage, findAllItemsException.getMessage(), "Exception massage and" +
+                " expectedMassage is not match");
+
+        final ItemForRequestDto itemDto = ItemForRequestDto.builder()
+                .name("Дрель ударная Bosh")
+                .description("Мощность 7000W")
+                .available(true)
+                .requestId(null)
+                .build();
+        final Exception createNewItemException = Assertions.assertThrows(IdNotFoundException.class, () ->
+                itemService.createNewItem(100L, itemDto));
+
+        Assertions.assertEquals(expectedMessage, createNewItemException.getMessage(), "Exception massage and" +
+                " expectedMassage is not match");
+
+        final Exception updateItemException = Assertions.assertThrows(IdNotFoundException.class, () ->
+                itemService.updateItem(100L, 1L, itemDto));
+
+        Assertions.assertEquals(expectedMessage, updateItemException.getMessage(), "Exception massage and" +
+                " expectedMassage is not match");
+
+        final Exception searchItemException = Assertions.assertThrows(IdNotFoundException.class, () ->
+                itemService.searchItem(100L, "Кошка", 0, 20));
+
+        Assertions.assertEquals(expectedMessage, searchItemException.getMessage(), "Exception massage and" +
+                " expectedMassage is not match");
+
+        final CommentForRequestDto commentDto = CommentForRequestDto.builder()
+                .text("Какая-то ерунда, крутится не в ту сторону. Не закручивает винты")
+                .build();
+        final Exception createNewCommentException = Assertions.assertThrows(IdNotFoundException.class, () ->
+                itemService.createNewComment(100L, 1L, commentDto));
+
+        Assertions.assertEquals(expectedMessage, createNewCommentException.getMessage(), "Exception massage and" +
+                " expectedMassage is not match");
     }
 }
