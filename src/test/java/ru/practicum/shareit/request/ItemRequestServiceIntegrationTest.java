@@ -7,8 +7,9 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.exception.IdNotFoundException;
-import ru.practicum.shareit.item.dto.ItemForResponseDto;
-import ru.practicum.shareit.request.dto.ExtendedItemRequestForResponseDto;
+import ru.practicum.shareit.item.dto.ItemResponseDto;
+import ru.practicum.shareit.request.dto.ItemRequestExtendedResponseDto;
+import ru.practicum.shareit.request.service.ItemRequestService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -27,21 +28,21 @@ public class ItemRequestServiceIntegrationTest {
     @Test
     @DisplayName("Method findItemRequestById(long userId, long id) should return expected Request")
     void shouldReturnRequestById() throws Exception {
-        final ItemForResponseDto testItem = ItemForResponseDto.builder()
+        final ItemResponseDto testItem = ItemResponseDto.builder()
                 .id(7L)
                 .name("Прожектор диодный для кино")
                 .description("Мощность 200W. В наличии до 10 штук.")
                 .available(true)
                 .requestId(1L)
                 .build();
-        final ExtendedItemRequestForResponseDto expectedRequest = ExtendedItemRequestForResponseDto.builder()
+        final ItemRequestExtendedResponseDto expectedRequest = ItemRequestExtendedResponseDto.builder()
                 .id(1L)
                 .description("Нужно осветительное оборудование для съемки клипа")
                 .created(LocalDateTime.parse("2023-08-01T00:00:00"))
                 .items(List.of(testItem))
                 .build();
 
-        final ExtendedItemRequestForResponseDto request = itemRequestService.findItemRequestById(2L, 1L);
+        final ItemRequestExtendedResponseDto request = itemRequestService.findItemRequestById(2L, 1L);
 
         assertEquals(expectedRequest, request, "Request and expectedRequest is not match");
     }
@@ -62,28 +63,28 @@ public class ItemRequestServiceIntegrationTest {
     @Test
     @DisplayName("Method findItemRequestsByUserId(long userId) should return correct list of ItemRequests")
     void shouldReturnItemRequestsByUserId() throws Exception {
-        final List<ItemForResponseDto> expectedRequest1items = List.of(ItemForResponseDto.builder()
+        final List<ItemResponseDto> expectedRequest1items = List.of(ItemResponseDto.builder()
                 .id(7L)
                 .name("Прожектор диодный для кино")
                 .description("Мощность 200W. В наличии до 10 штук.")
                 .available(true)
                 .requestId(1L)
                 .build());
-        final ExtendedItemRequestForResponseDto expectedRequest1 = ExtendedItemRequestForResponseDto.builder()
+        final ItemRequestExtendedResponseDto expectedRequest1 = ItemRequestExtendedResponseDto.builder()
                 .id(1L)
                 .description("Нужно осветительное оборудование для съемки клипа")
                 .created(LocalDateTime.parse("2023-08-01T00:00:00"))
                 .items(expectedRequest1items)
                 .build();
-        final ExtendedItemRequestForResponseDto expectedRequest2 = ExtendedItemRequestForResponseDto.builder()
+        final ItemRequestExtendedResponseDto expectedRequest2 = ItemRequestExtendedResponseDto.builder()
                 .id(4L)
                 .description("Нужен дрон с камерой для съемки клипа")
                 .created(LocalDateTime.parse("2023-10-05T00:00:00"))
                 .items(new ArrayList<>())
                 .build();
-        final List<ExtendedItemRequestForResponseDto> expectedRequests = List.of(expectedRequest2, expectedRequest1);
+        final List<ItemRequestExtendedResponseDto> expectedRequests = List.of(expectedRequest2, expectedRequest1);
 
-        final List<ExtendedItemRequestForResponseDto> requests = itemRequestService.findItemRequestsByUserId(3L);
+        final List<ItemRequestExtendedResponseDto> requests = itemRequestService.findItemRequestsByUserId(3L);
 
         assertEquals(expectedRequests, requests, "Requests and expectedRequests is not match");
     }
@@ -92,29 +93,29 @@ public class ItemRequestServiceIntegrationTest {
     @DisplayName("Method findAllItemRequests(long userId, int from, int size) should return correct list of" +
             " ItemRequests")
     void shouldReturnItemRequestsOfOtherUsers() throws Exception {
-        final ExtendedItemRequestForResponseDto expectedRequest1 = ExtendedItemRequestForResponseDto.builder()
+        final ItemRequestExtendedResponseDto expectedRequest1 = ItemRequestExtendedResponseDto.builder()
                 .id(2L)
                 .description("Возьму в аренду бетономешалку литров на 50-100")
                 .created(LocalDateTime.parse("2023-08-05T00:00:00"))
                 .items(new ArrayList<>())
                 .build();
-        final ExtendedItemRequestForResponseDto expectedRequest2 = ExtendedItemRequestForResponseDto.builder()
+        final ItemRequestExtendedResponseDto expectedRequest2 = ItemRequestExtendedResponseDto.builder()
                 .id(3L)
                 .description("Прицеп для лодки Прогресс-10")
                 .created(LocalDateTime.parse("2023-09-10T00:00:00"))
                 .items(new ArrayList<>())
                 .build();
-        final ExtendedItemRequestForResponseDto expectedRequest3 = ExtendedItemRequestForResponseDto.builder()
+        final ItemRequestExtendedResponseDto expectedRequest3 = ItemRequestExtendedResponseDto.builder()
                 .id(5L)
                 .description("Ищем 3 сноуборда с ботинками на зимние каникулы")
                 .created(LocalDateTime.parse("2023-11-15T00:00:00"))
                 .items(new ArrayList<>())
                 .build();
-        final List<ExtendedItemRequestForResponseDto> expectedRequests = List.of(expectedRequest3,
+        final List<ItemRequestExtendedResponseDto> expectedRequests = List.of(expectedRequest3,
                 expectedRequest2,
                 expectedRequest1);
 
-        final List<ExtendedItemRequestForResponseDto> requests = itemRequestService
+        final List<ItemRequestExtendedResponseDto> requests = itemRequestService
                 .findAllItemRequests(3L, 0, 20);
 
         assertEquals(expectedRequests, requests, "Requests and expectedRequests is not match");

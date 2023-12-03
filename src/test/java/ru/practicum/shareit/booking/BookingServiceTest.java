@@ -8,17 +8,24 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.practicum.shareit.booking.dto.BookingForRequestDto;
-import ru.practicum.shareit.booking.dto.BookingForResponseDto;
+import ru.practicum.shareit.booking.dto.BookingCreateDto;
+import ru.practicum.shareit.booking.dto.BookingResponseDto;
+import ru.practicum.shareit.booking.entity.Booking;
+import ru.practicum.shareit.booking.entity.BookingStatus;
+import ru.practicum.shareit.booking.mapper.BookingMapper;
+import ru.practicum.shareit.booking.mapper.BookingMapperImpl;
+import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.booking.service.BookingServiceDbImpl;
 import ru.practicum.shareit.exception.AccessNotAllowedException;
 import ru.practicum.shareit.exception.IdNotFoundException;
 import ru.practicum.shareit.exception.RequestValidationException;
-import ru.practicum.shareit.item.Item;
-import ru.practicum.shareit.item.ItemService;
-import ru.practicum.shareit.item.dto.ItemForBookingDto;
-import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserService;
-import ru.practicum.shareit.user.dto.UserForBookingDto;
+import ru.practicum.shareit.item.entity.Item;
+import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.item.dto.ItemBookingDto;
+import ru.practicum.shareit.user.entity.User;
+import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.dto.UserBookingDto;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -81,14 +88,14 @@ public class BookingServiceTest {
     @DisplayName("Method createNewBooking(long userId, BookingForRequestDto bookingDto) should return correct" +
             " created Booking")
     void shouldCreateNewBooking() throws Exception {
-        final UserForBookingDto expectedBookingBooker = UserForBookingDto.builder()
+        final UserBookingDto expectedBookingBooker = UserBookingDto.builder()
                 .id(4L)
                 .build();
-        final ItemForBookingDto expectedBookingItem = ItemForBookingDto.builder()
+        final ItemBookingDto expectedBookingItem = ItemBookingDto.builder()
                 .id(3L)
                 .name("Байдарка трёхместная Ладога")
                 .build();
-        final BookingForResponseDto expectedBooking = BookingForResponseDto.builder()
+        final BookingResponseDto expectedBooking = BookingResponseDto.builder()
                 .id(1L)
                 .start(LocalDateTime.parse("2023-08-01T00:00:00"))
                 .end(LocalDateTime.parse("2023-08-10T00:00:00"))
@@ -96,7 +103,7 @@ public class BookingServiceTest {
                 .booker(expectedBookingBooker)
                 .item(expectedBookingItem)
                 .build();
-        final BookingForRequestDto bookingDto = BookingForRequestDto.builder()
+        final BookingCreateDto bookingDto = BookingCreateDto.builder()
                 .start(LocalDateTime.parse("2023-08-01T00:00:00"))
                 .end(LocalDateTime.parse("2023-08-10T00:00:00"))
                 .itemId(3L)
@@ -142,7 +149,7 @@ public class BookingServiceTest {
                 .build();
         Mockito.when(bookingRepository.save(booking)).thenReturn(newBooking);
 
-        final BookingForResponseDto savedBooking = bookingService.createNewBooking(4L, bookingDto);
+        final BookingResponseDto savedBooking = bookingService.createNewBooking(4L, bookingDto);
 
         assertEquals(expectedBooking, savedBooking, "SavedBooking and expectedBooking is not match");
     }
@@ -152,7 +159,7 @@ public class BookingServiceTest {
             " AccessNotAllowedException when User is owner of Item")
     void shouldThrowExceptionWhenUserIsOwnerOfItem() throws Exception {
         final String expectedMessage = "User 4 is owner of item 3";
-        final BookingForRequestDto bookingDto = BookingForRequestDto.builder()
+        final BookingCreateDto bookingDto = BookingCreateDto.builder()
                 .start(LocalDateTime.parse("2023-08-01T00:00:00"))
                 .end(LocalDateTime.parse("2023-08-10T00:00:00"))
                 .itemId(3L)
@@ -186,7 +193,7 @@ public class BookingServiceTest {
             " RequestValidationException when Item is not available")
     void shouldThrowExceptionWhenItemNotAvailable() throws Exception {
         final String expectedMessage = "Item 3 not available";
-        final BookingForRequestDto bookingDto = BookingForRequestDto.builder()
+        final BookingCreateDto bookingDto = BookingCreateDto.builder()
                 .start(LocalDateTime.parse("2023-08-01T00:00:00"))
                 .end(LocalDateTime.parse("2023-08-10T00:00:00"))
                 .itemId(3L)
@@ -226,7 +233,7 @@ public class BookingServiceTest {
     void shouldThrowExceptionWhenStartLaterThanEnd() throws Exception {
         final String expectedMessage = "End booking date 2023-08-01T00:00 can`t be earlier than start date" +
                 " 2023-08-10T00:00";
-        final BookingForRequestDto bookingDto = BookingForRequestDto.builder()
+        final BookingCreateDto bookingDto = BookingCreateDto.builder()
                 .start(LocalDateTime.parse("2023-08-10T00:00:00"))
                 .end(LocalDateTime.parse("2023-08-01T00:00:00"))
                 .itemId(3L)
@@ -286,7 +293,7 @@ public class BookingServiceTest {
         Assertions.assertEquals(expectedMessage, findAllBookingsByOwnerIdException.getMessage(), "Exception" +
                 " massage and expectedMassage is not match");
 
-        final BookingForRequestDto bookingDto = BookingForRequestDto.builder()
+        final BookingCreateDto bookingDto = BookingCreateDto.builder()
                 .start(LocalDateTime.parse("2023-08-10T00:00:00"))
                 .end(LocalDateTime.parse("2023-08-01T00:00:00"))
                 .itemId(3L)

@@ -14,8 +14,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.practicum.shareit.exception.ExceptionViolation;
 import ru.practicum.shareit.exception.IdNotFoundException;
 import ru.practicum.shareit.exception.ValidationViolation;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.dto.UserForResponseDto;
+import ru.practicum.shareit.user.controller.UserController;
+import ru.practicum.shareit.user.dto.UserCreateUpdateDto;
+import ru.practicum.shareit.user.dto.UserResponseDto;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.util.List;
 
@@ -31,7 +33,7 @@ public class UserControllerTest {
     @DisplayName("GET /users/{id} returns HTTP-response with status code 200, content type application/json and" +
             " correct user")
     void shouldReturnUser() throws Exception {
-        final UserForResponseDto testUser = UserForResponseDto.builder()
+        final UserResponseDto testUser = UserResponseDto.builder()
                 .id(1L)
                 .name("Иванов Иван")
                 .email("IvanovIvan@gmail.com")
@@ -63,17 +65,17 @@ public class UserControllerTest {
     @DisplayName("GET /users returns HTTP-response with status code 200, content type application/json and correct " +
             "list of users")
     void shouldReturnAllUsers() throws Exception {
-        final UserForResponseDto testUser1 = UserForResponseDto.builder()
+        final UserResponseDto testUser1 = UserResponseDto.builder()
                 .id(1L)
                 .name("Иванов Иван")
                 .email("IvanovIvan@gmail.com")
                 .build();
-        final UserForResponseDto testUser2 = UserForResponseDto.builder()
+        final UserResponseDto testUser2 = UserResponseDto.builder()
                 .id(2L)
                 .name("Петр Петров")
                 .email("nagibator1999@mail.ru")
                 .build();
-        final List<UserForResponseDto> testUsers = List.of(testUser1, testUser2);
+        final List<UserResponseDto> testUsers = List.of(testUser1, testUser2);
 
         Mockito.when(userService.findAllUsers()).thenReturn(testUsers);
 
@@ -87,21 +89,21 @@ public class UserControllerTest {
     @DisplayName("POST /users returns HTTP-response with status code 200, content type application/json and correct " +
             "created user")
     void shouldCreateNewUser() throws Exception {
-        final UserDto userDto = UserDto.builder()
+        final UserCreateUpdateDto userCreateUpdateDto = UserCreateUpdateDto.builder()
                 .name("Иванов Иван")
                 .email("IvanovIvan@gmail.com")
                 .build();
-        final UserForResponseDto testUser = UserForResponseDto.builder()
+        final UserResponseDto testUser = UserResponseDto.builder()
                 .id(1L)
                 .name("Иванов Иван")
                 .email("IvanovIvan@gmail.com")
                 .build();
 
-        Mockito.when(userService.createNewUser(userDto)).thenReturn(testUser);
+        Mockito.when(userService.createNewUser(userCreateUpdateDto)).thenReturn(testUser);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userDto)))
+                        .content(objectMapper.writeValueAsString(userCreateUpdateDto)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(testUser)));
@@ -111,7 +113,7 @@ public class UserControllerTest {
     @DisplayName("POST /users returns HTTP-response with status code 400, content type application/json and " +
             "validation error massage, when input user`s fields is incorrect")
     void shouldNotCreateUserWithIncorrectFields() throws Exception {
-        final UserDto incorrectUserDto = UserDto.builder()
+        final UserCreateUpdateDto incorrectUserCreateUpdateDto = UserCreateUpdateDto.builder()
                 .name(" ")
                 .email("IvanovIvanIvanovich")
                 .build();
@@ -121,7 +123,7 @@ public class UserControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(incorrectUserDto)))
+                        .content(objectMapper.writeValueAsString(incorrectUserCreateUpdateDto)))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(errorResponse)));
@@ -131,7 +133,7 @@ public class UserControllerTest {
     @DisplayName("POST /users returns HTTP-response with status code 400, content type application/json and " +
             "validation error massage, when input user`s fields is null")
     void shouldNotCreateUserWithNullFields() throws Exception {
-        final UserDto incorrectUserDto = UserDto.builder()
+        final UserCreateUpdateDto incorrectUserCreateUpdateDto = UserCreateUpdateDto.builder()
                 .name(null)
                 .email(null)
                 .build();
@@ -141,7 +143,7 @@ public class UserControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(incorrectUserDto)))
+                        .content(objectMapper.writeValueAsString(incorrectUserCreateUpdateDto)))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(errorResponse)));
@@ -151,21 +153,21 @@ public class UserControllerTest {
     @DisplayName("PATCH /users/{id} returns HTTP-response with status code 200, content type application/json and " +
             "correct changed user")
     void shouldUpdateUser() throws Exception {
-        final UserDto userDto = UserDto.builder()
+        final UserCreateUpdateDto userCreateUpdateDto = UserCreateUpdateDto.builder()
                 .name("Иванов Иван")
                 .email(null)
                 .build();
-        final UserForResponseDto testUser = UserForResponseDto.builder()
+        final UserResponseDto testUser = UserResponseDto.builder()
                 .id(1L)
                 .name("Иванов Иван")
                 .email("IvanovIvan@gmail.com")
                 .build();
 
-        Mockito.when(userService.updateUser(1L, userDto)).thenReturn(testUser);
+        Mockito.when(userService.updateUser(1L, userCreateUpdateDto)).thenReturn(testUser);
 
         mockMvc.perform(MockMvcRequestBuilders.patch("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userDto)))
+                        .content(objectMapper.writeValueAsString(userCreateUpdateDto)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(testUser)));
@@ -175,18 +177,18 @@ public class UserControllerTest {
     @DisplayName("PATCH /users/{id} returns HTTP-response with status code 404, content type application/json and " +
             "error massage, when user id is not exist")
     void shouldNotUpdateUserWithIdNotExist() throws Exception {
-        final UserDto userDto = UserDto.builder()
+        final UserCreateUpdateDto userCreateUpdateDto = UserCreateUpdateDto.builder()
                 .name("Иванов Иван")
                 .email("IvanovIvan@gmail.com")
                 .build();
         final ExceptionViolation errorResponse = new ExceptionViolation("User with id 100 not exist");
 
-        Mockito.when(userService.updateUser(100L, userDto))
+        Mockito.when(userService.updateUser(100L, userCreateUpdateDto))
                 .thenThrow(new IdNotFoundException("User with id 100 not exist"));
 
         mockMvc.perform(MockMvcRequestBuilders.patch("/users/100")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userDto)))
+                        .content(objectMapper.writeValueAsString(userCreateUpdateDto)))
                 .andExpect(MockMvcResultMatchers.status().isNotFound())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(errorResponse)));

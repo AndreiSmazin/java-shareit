@@ -8,15 +8,22 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.IdNotFoundException;
-import ru.practicum.shareit.item.dto.CommentForRequestDto;
-import ru.practicum.shareit.item.dto.ItemForRequestDto;
-import ru.practicum.shareit.item.dto.ItemForResponseDto;
-import ru.practicum.shareit.request.ItemRequest;
-import ru.practicum.shareit.request.ItemRequestService;
-import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserService;
+import ru.practicum.shareit.item.dto.CommentCreateDto;
+import ru.practicum.shareit.item.dto.ItemCreateUpdateDto;
+import ru.practicum.shareit.item.dto.ItemResponseDto;
+import ru.practicum.shareit.item.entity.Item;
+import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.mapper.ItemMapperImpl;
+import ru.practicum.shareit.item.repository.CommentRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.item.service.ItemServiceDbImpl;
+import ru.practicum.shareit.request.entity.ItemRequest;
+import ru.practicum.shareit.request.service.ItemRequestService;
+import ru.practicum.shareit.user.entity.User;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.util.List;
 import java.util.Optional;
@@ -91,14 +98,14 @@ public class ItemServiceTest {
                 .name("Сергей Иванов")
                 .email("SupremeSerg91@yandex.com")
                 .build();
-        final ItemForResponseDto expectedItem = ItemForResponseDto.builder()
+        final ItemResponseDto expectedItem = ItemResponseDto.builder()
                 .id(1)
                 .name("Дрель ударная Bosh")
                 .description("Мощность 7000W")
                 .available(true)
                 .requestId(1L)
                 .build();
-        final ItemForRequestDto itemDto = ItemForRequestDto.builder()
+        final ItemCreateUpdateDto itemDto = ItemCreateUpdateDto.builder()
                 .name("Дрель ударная Bosh")
                 .description("Мощность 7000W")
                 .available(true)
@@ -120,7 +127,7 @@ public class ItemServiceTest {
         item.setOwner(testUser);
         Mockito.when(itemRepository.save(item)).thenReturn(newItem);
 
-        final ItemForResponseDto createdItem = itemService.createNewItem(3L, itemDto);
+        final ItemResponseDto createdItem = itemService.createNewItem(3L, itemDto);
 
         Assertions.assertEquals(expectedItem, createdItem, "CreatedItem and expectedItem is not match");
     }
@@ -131,7 +138,7 @@ public class ItemServiceTest {
     void shouldReturnEmptyListWhenSearchTextBlank() throws Exception {
         Mockito.when(userService.checkUser(3L)).thenReturn(new User());
 
-        final List<ItemForResponseDto> items = itemService.searchItem(3L, "", 0, 20);
+        final List<ItemResponseDto> items = itemService.searchItem(3L, "", 0, 20);
 
         Assertions.assertTrue(items.isEmpty(), "Items list is not empty");
     }
@@ -156,7 +163,7 @@ public class ItemServiceTest {
         Assertions.assertEquals(expectedMessage, findAllItemsException.getMessage(), "Exception massage and" +
                 " expectedMassage is not match");
 
-        final ItemForRequestDto itemDto = ItemForRequestDto.builder()
+        final ItemCreateUpdateDto itemDto = ItemCreateUpdateDto.builder()
                 .name("Дрель ударная Bosh")
                 .description("Мощность 7000W")
                 .available(true)
@@ -180,7 +187,7 @@ public class ItemServiceTest {
         Assertions.assertEquals(expectedMessage, searchItemException.getMessage(), "Exception massage and" +
                 " expectedMassage is not match");
 
-        final CommentForRequestDto commentDto = CommentForRequestDto.builder()
+        final CommentCreateDto commentDto = CommentCreateDto.builder()
                 .text("Какая-то ерунда, крутится не в ту сторону. Не закручивает винты")
                 .build();
         final Exception createNewCommentException = Assertions.assertThrows(IdNotFoundException.class, () ->

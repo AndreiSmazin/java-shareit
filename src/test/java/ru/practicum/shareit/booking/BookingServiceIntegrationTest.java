@@ -7,12 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import ru.practicum.shareit.booking.dto.BookingForResponseDto;
+import ru.practicum.shareit.booking.dto.BookingResponseDto;
+import ru.practicum.shareit.booking.entity.BookingStatus;
+import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.AccessNotAllowedException;
 import ru.practicum.shareit.exception.IdNotFoundException;
 import ru.practicum.shareit.exception.RequestValidationException;
-import ru.practicum.shareit.item.dto.ItemForBookingDto;
-import ru.practicum.shareit.user.dto.UserForBookingDto;
+import ru.practicum.shareit.item.dto.ItemBookingDto;
+import ru.practicum.shareit.user.dto.UserBookingDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,14 +29,14 @@ public class BookingServiceIntegrationTest {
     @Test
     @DisplayName("Method findBooking(long userId, long id) should return expected Booking")
     void shouldReturnBookingById() throws Exception {
-        final UserForBookingDto testBooker = UserForBookingDto.builder()
+        final UserBookingDto testBooker = UserBookingDto.builder()
                 .id(4L)
                 .build();
-        final ItemForBookingDto testItem = ItemForBookingDto.builder()
+        final ItemBookingDto testItem = ItemBookingDto.builder()
                 .id(3L)
                 .name("Байдарка трёхместная Ладога")
                 .build();
-        final BookingForResponseDto expectedBooking = BookingForResponseDto.builder()
+        final BookingResponseDto expectedBooking = BookingResponseDto.builder()
                 .id(1L)
                 .start(LocalDateTime.parse("2023-08-01T00:00:00"))
                 .end(LocalDateTime.parse("2023-08-10T00:00:00"))
@@ -43,8 +45,8 @@ public class BookingServiceIntegrationTest {
                 .booker(testBooker)
                 .build();
 
-        final BookingForResponseDto bookingForBooker = bookingService.findBooking(4L, 1L);
-        final BookingForResponseDto bookingForItemOwner = bookingService.findBooking(1L, 1L);
+        final BookingResponseDto bookingForBooker = bookingService.findBooking(4L, 1L);
+        final BookingResponseDto bookingForItemOwner = bookingService.findBooking(1L, 1L);
 
         Assertions.assertEquals(expectedBooking, bookingForBooker, "Booking and expectedBooking is not match");
         Assertions.assertEquals(expectedBooking, bookingForItemOwner, "Booking and expectedBooking is not match");
@@ -79,14 +81,14 @@ public class BookingServiceIntegrationTest {
     @DisplayName("Method updateBookingStatus(long userId, long id, boolean approved) should return expected Booking" +
             " with updated status")
     void shouldReturnBookingWithUpdatedStatus() throws Exception {
-        final UserForBookingDto testBooker = UserForBookingDto.builder()
+        final UserBookingDto testBooker = UserBookingDto.builder()
                 .id(2L)
                 .build();
-        final ItemForBookingDto testItem = ItemForBookingDto.builder()
+        final ItemBookingDto testItem = ItemBookingDto.builder()
                 .id(1L)
                 .name("Дрель ударная Bosh")
                 .build();
-        final BookingForResponseDto expectedBooking = BookingForResponseDto.builder()
+        final BookingResponseDto expectedBooking = BookingResponseDto.builder()
                 .id(6L)
                 .start(LocalDateTime.parse("2023-12-24T00:00:00"))
                 .end(LocalDateTime.parse("2023-12-25T00:00:00"))
@@ -95,7 +97,7 @@ public class BookingServiceIntegrationTest {
                 .booker(testBooker)
                 .build();
 
-        final BookingForResponseDto booking = bookingService.updateBookingStatus(1L, 6L, true);
+        final BookingResponseDto booking = bookingService.updateBookingStatus(1L, 6L, true);
 
         Assertions.assertEquals(expectedBooking, booking, "Booking and expectedBooking is not match");
     }
@@ -130,14 +132,14 @@ public class BookingServiceIntegrationTest {
     @DisplayName("Method findAllBookingsByUserId(long userId, String state, int from, int size) should return correct" +
             " list of Bookings with ALL state")
     void shouldReturnAllBookingsByUserId() throws Exception {
-        final UserForBookingDto testUser = UserForBookingDto.builder()
+        final UserBookingDto testUser = UserBookingDto.builder()
                 .id(4L)
                 .build();
-        final ItemForBookingDto testItem = ItemForBookingDto.builder()
+        final ItemBookingDto testItem = ItemBookingDto.builder()
                 .id(3L)
                 .name("Байдарка трёхместная Ладога")
                 .build();
-        final BookingForResponseDto expectedBooking1 = BookingForResponseDto.builder()
+        final BookingResponseDto expectedBooking1 = BookingResponseDto.builder()
                 .id(1)
                 .start(LocalDateTime.parse("2023-08-01T00:00:00"))
                 .end(LocalDateTime.parse("2023-08-10T00:00:00"))
@@ -145,7 +147,7 @@ public class BookingServiceIntegrationTest {
                 .booker(testUser)
                 .item(testItem)
                 .build();
-        final BookingForResponseDto expectedBooking2 = BookingForResponseDto.builder()
+        final BookingResponseDto expectedBooking2 = BookingResponseDto.builder()
                 .id(4)
                 .start(LocalDateTime.parse("2024-06-15T00:00:00"))
                 .end(LocalDateTime.parse("2024-06-20T00:00:00"))
@@ -153,9 +155,9 @@ public class BookingServiceIntegrationTest {
                 .booker(testUser)
                 .item(testItem)
                 .build();
-        final List<BookingForResponseDto> expectedBookings = List.of(expectedBooking2, expectedBooking1);
+        final List<BookingResponseDto> expectedBookings = List.of(expectedBooking2, expectedBooking1);
 
-        final List<BookingForResponseDto> bookings = bookingService
+        final List<BookingResponseDto> bookings = bookingService
                 .findAllBookingsByUserId(4L, "ALL", 0, 20);
 
         Assertions.assertEquals(expectedBookings, bookings, "Bookings and expectedBookings is not match");
@@ -165,14 +167,14 @@ public class BookingServiceIntegrationTest {
     @DisplayName("Method findAllBookingsByUserId(long userId, String state, int from, int size) should return correct" +
             " list of Bookings with PAST state")
     void shouldReturnPastBookingsByUserId() throws Exception {
-        final UserForBookingDto testUser = UserForBookingDto.builder()
+        final UserBookingDto testUser = UserBookingDto.builder()
                 .id(4L)
                 .build();
-        final ItemForBookingDto testItem = ItemForBookingDto.builder()
+        final ItemBookingDto testItem = ItemBookingDto.builder()
                 .id(3L)
                 .name("Байдарка трёхместная Ладога")
                 .build();
-        final BookingForResponseDto expectedBooking = BookingForResponseDto.builder()
+        final BookingResponseDto expectedBooking = BookingResponseDto.builder()
                 .id(1)
                 .start(LocalDateTime.parse("2023-08-01T00:00:00"))
                 .end(LocalDateTime.parse("2023-08-10T00:00:00"))
@@ -180,9 +182,9 @@ public class BookingServiceIntegrationTest {
                 .booker(testUser)
                 .item(testItem)
                 .build();
-        final List<BookingForResponseDto> expectedBookings = List.of(expectedBooking);
+        final List<BookingResponseDto> expectedBookings = List.of(expectedBooking);
 
-        final List<BookingForResponseDto> bookings = bookingService
+        final List<BookingResponseDto> bookings = bookingService
                 .findAllBookingsByUserId(4L, "PAST", 0, 20);
 
         Assertions.assertEquals(expectedBookings, bookings, "Bookings and expectedBookings is not match");
@@ -192,14 +194,14 @@ public class BookingServiceIntegrationTest {
     @DisplayName("Method findAllBookingsByUserId(long userId, String state, int from, int size) should return correct" +
             " list of Bookings with FUTURE state")
     void shouldReturnFutureBookingsByUserId() throws Exception {
-        final UserForBookingDto testUser = UserForBookingDto.builder()
+        final UserBookingDto testUser = UserBookingDto.builder()
                 .id(4L)
                 .build();
-        final ItemForBookingDto testItem = ItemForBookingDto.builder()
+        final ItemBookingDto testItem = ItemBookingDto.builder()
                 .id(3L)
                 .name("Байдарка трёхместная Ладога")
                 .build();
-        final BookingForResponseDto expectedBooking = BookingForResponseDto.builder()
+        final BookingResponseDto expectedBooking = BookingResponseDto.builder()
                 .id(4)
                 .start(LocalDateTime.parse("2024-06-15T00:00:00"))
                 .end(LocalDateTime.parse("2024-06-20T00:00:00"))
@@ -207,9 +209,9 @@ public class BookingServiceIntegrationTest {
                 .booker(testUser)
                 .item(testItem)
                 .build();
-        final List<BookingForResponseDto> expectedBookings = List.of(expectedBooking);
+        final List<BookingResponseDto> expectedBookings = List.of(expectedBooking);
 
-        final List<BookingForResponseDto> bookings = bookingService
+        final List<BookingResponseDto> bookings = bookingService
                 .findAllBookingsByUserId(4L, "FUTURE", 0, 20);
 
         Assertions.assertEquals(expectedBookings, bookings, "Bookings and expectedBookings is not match");
@@ -219,17 +221,17 @@ public class BookingServiceIntegrationTest {
     @DisplayName("Method findAllBookingsByUserId(long userId, String state, int from, int size) should return empty" +
             " list of Bookings with CURRENT, REJECTED and WAITING states")
     void shouldReturnEmptyListWhenStateCurrentRejectedWaiting() throws Exception {
-        final List<BookingForResponseDto> currentBookings = bookingService
+        final List<BookingResponseDto> currentBookings = bookingService
                 .findAllBookingsByUserId(4L, "CURRENT", 0, 20);
 
         Assertions.assertTrue(currentBookings.isEmpty(), "Bookings list is not empty");
 
-        final List<BookingForResponseDto> rejectedBookings = bookingService
+        final List<BookingResponseDto> rejectedBookings = bookingService
                 .findAllBookingsByUserId(4L, "REJECTED", 0, 20);
 
         Assertions.assertTrue(rejectedBookings.isEmpty(), "Bookings list is not empty");
 
-        final List<BookingForResponseDto> waitingBookings = bookingService
+        final List<BookingResponseDto> waitingBookings = bookingService
                 .findAllBookingsByUserId(4L, "WAITING", 0, 20);
 
         Assertions.assertTrue(waitingBookings.isEmpty(), "Bookings list is not empty");
@@ -251,14 +253,14 @@ public class BookingServiceIntegrationTest {
     @DisplayName("Method findAllBookingsByOwnerId(long userId, String state, int from, int size) should return correct" +
             " list of Bookings with ALL state")
     void shouldReturnAllBookingsByOwnerId() throws Exception {
-        final UserForBookingDto testUser = UserForBookingDto.builder()
+        final UserBookingDto testUser = UserBookingDto.builder()
                 .id(2L)
                 .build();
-        final ItemForBookingDto testItem = ItemForBookingDto.builder()
+        final ItemBookingDto testItem = ItemBookingDto.builder()
                 .id(2L)
                 .name("Дрель аккумуляторная")
                 .build();
-        final BookingForResponseDto expectedBooking = BookingForResponseDto.builder()
+        final BookingResponseDto expectedBooking = BookingResponseDto.builder()
                 .id(5)
                 .start(LocalDateTime.parse("2023-11-01T00:00:00"))
                 .end(LocalDateTime.parse("2023-11-10T00:00:00"))
@@ -266,9 +268,9 @@ public class BookingServiceIntegrationTest {
                 .booker(testUser)
                 .item(testItem)
                 .build();
-        final List<BookingForResponseDto> expectedBookings = List.of(expectedBooking);
+        final List<BookingResponseDto> expectedBookings = List.of(expectedBooking);
 
-        final List<BookingForResponseDto> bookings = bookingService
+        final List<BookingResponseDto> bookings = bookingService
                 .findAllBookingsByOwnerId(3L, "ALL", 0, 20);
 
         Assertions.assertEquals(expectedBookings, bookings, "Bookings and expectedBookings is not match");

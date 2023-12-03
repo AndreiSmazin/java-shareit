@@ -8,8 +8,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.exception.IdNotFoundException;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.dto.UserForResponseDto;
+import ru.practicum.shareit.user.dto.UserCreateUpdateDto;
+import ru.practicum.shareit.user.dto.UserResponseDto;
+import ru.practicum.shareit.user.entity.User;
+import ru.practicum.shareit.user.mapper.UserMapper;
+import ru.practicum.shareit.user.mapper.UserMapperImpl;
+import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.service.UserServiceDbImpl;
 
 import java.util.List;
 import java.util.Optional;
@@ -73,13 +79,13 @@ public class UserServiceTest {
                 .name("Ирина Васильева")
                 .email("BobrIrina@google.com")
                 .build();
-        final List<UserForResponseDto> expectedUsers = Stream.of(testUser1, testUser2)
+        final List<UserResponseDto> expectedUsers = Stream.of(testUser1, testUser2)
                 .map(userMapper::userToUserForResponseDto)
                 .collect(Collectors.toList());
 
         Mockito.when(userRepository.findAll()).thenReturn(List.of(testUser1, testUser2));
 
-        final List<UserForResponseDto> users = userService.findAllUsers();
+        final List<UserResponseDto> users = userService.findAllUsers();
 
         assertEquals(expectedUsers, users, "UsersIds massage and expectedUsersIds is not match");
     }
@@ -87,12 +93,12 @@ public class UserServiceTest {
     @Test
     @DisplayName("Method createNewUser(UserDto userDto) should return correct created User")
     void shouldReturnCreatedUser() throws Exception {
-        final UserForResponseDto expectedUser = UserForResponseDto.builder()
+        final UserResponseDto expectedUser = UserResponseDto.builder()
                 .id(1L)
                 .name("Сергей Иванов")
                 .email("SupremeSerg91@yandex.com")
                 .build();
-        final UserDto userDto = UserDto.builder()
+        final UserCreateUpdateDto userCreateUpdateDto = UserCreateUpdateDto.builder()
                 .name("Сергей Иванов")
                 .email("SupremeSerg91@yandex.com")
                 .build();
@@ -102,9 +108,9 @@ public class UserServiceTest {
                 .name("Сергей Иванов")
                 .email("SupremeSerg91@yandex.com")
                 .build();
-        Mockito.when(userRepository.save(userMapper.userDtoToUser(userDto))).thenReturn(newUser);
+        Mockito.when(userRepository.save(userMapper.userDtoToUser(userCreateUpdateDto))).thenReturn(newUser);
 
-        final UserForResponseDto createdUser = userService.createNewUser(userDto);
+        final UserResponseDto createdUser = userService.createNewUser(userCreateUpdateDto);
 
         assertEquals(expectedUser, createdUser, "User and expectedUser is not match");
     }

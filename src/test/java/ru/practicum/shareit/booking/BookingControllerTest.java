@@ -13,15 +13,18 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.practicum.shareit.booking.dto.BookingForRequestDto;
-import ru.practicum.shareit.booking.dto.BookingForResponseDto;
+import ru.practicum.shareit.booking.controller.BookingController;
+import ru.practicum.shareit.booking.dto.BookingCreateDto;
+import ru.practicum.shareit.booking.dto.BookingResponseDto;
+import ru.practicum.shareit.booking.entity.BookingStatus;
+import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.AccessNotAllowedException;
 import ru.practicum.shareit.exception.ExceptionViolation;
 import ru.practicum.shareit.exception.IdNotFoundException;
 import ru.practicum.shareit.exception.RequestValidationException;
 import ru.practicum.shareit.exception.ValidationViolation;
-import ru.practicum.shareit.item.dto.ItemForBookingDto;
-import ru.practicum.shareit.user.dto.UserForBookingDto;
+import ru.practicum.shareit.item.dto.ItemBookingDto;
+import ru.practicum.shareit.user.dto.UserBookingDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,14 +42,14 @@ public class BookingControllerTest {
     @DisplayName("GET /bookings/{id} returns HTTP-response with status code 200, content type application/json and " +
             "correct booking")
     void shouldReturnBooking() throws Exception {
-        final UserForBookingDto testBooker = UserForBookingDto.builder()
+        final UserBookingDto testBooker = UserBookingDto.builder()
                 .id(1L)
                 .build();
-        final ItemForBookingDto testItem = ItemForBookingDto.builder()
+        final ItemBookingDto testItem = ItemBookingDto.builder()
                 .id(1L)
                 .name("Петров Алексей")
                 .build();
-        final BookingForResponseDto testBooking = BookingForResponseDto.builder()
+        final BookingResponseDto testBooking = BookingResponseDto.builder()
                 .id(1L)
                 .start(LocalDateTime.parse("2023-11-26T20:00:00"))
                 .end(LocalDateTime.parse("2023-11-30T20:00:00"))
@@ -111,14 +114,14 @@ public class BookingControllerTest {
     @DisplayName("GET /bookings returns HTTP-response with status code 200, content type application/json and " +
             "correct list of bookings")
     void shouldReturnAllBookingsOfUser() throws Exception {
-        final UserForBookingDto testBooker = UserForBookingDto.builder()
+        final UserBookingDto testBooker = UserBookingDto.builder()
                 .id(1L)
                 .build();
-        final ItemForBookingDto testItem1 = ItemForBookingDto.builder()
+        final ItemBookingDto testItem1 = ItemBookingDto.builder()
                 .id(1L)
                 .name("Семенова Анна")
                 .build();
-        final BookingForResponseDto testBooking1 = BookingForResponseDto.builder()
+        final BookingResponseDto testBooking1 = BookingResponseDto.builder()
                 .id(1L)
                 .start(LocalDateTime.parse("2023-11-26T20:00:00"))
                 .end(LocalDateTime.parse("2023-11-30T20:00:00"))
@@ -126,11 +129,11 @@ public class BookingControllerTest {
                 .booker(testBooker)
                 .item(testItem1)
                 .build();
-        final ItemForBookingDto testItem2 = ItemForBookingDto.builder()
+        final ItemBookingDto testItem2 = ItemBookingDto.builder()
                 .id(2L)
                 .name("Петров Алексей")
                 .build();
-        final BookingForResponseDto testBooking2 = BookingForResponseDto.builder()
+        final BookingResponseDto testBooking2 = BookingResponseDto.builder()
                 .id(2L)
                 .start(LocalDateTime.parse("2023-11-30T20:00:00"))
                 .end(LocalDateTime.parse("2023-12-02T20:00:00"))
@@ -138,7 +141,7 @@ public class BookingControllerTest {
                 .booker(testBooker)
                 .item(testItem2)
                 .build();
-        final List<BookingForResponseDto> testBookings = List.of(testBooking1, testBooking2);
+        final List<BookingResponseDto> testBookings = List.of(testBooking1, testBooking2);
 
         Mockito.when(bookingService.findAllBookingsByUserId(1L, "ALL", 0, 20))
                 .thenReturn(testBookings);
@@ -170,14 +173,14 @@ public class BookingControllerTest {
     @DisplayName("GET /bookings returns HTTP-response with status code 200, content type application/json and " +
             "correct list of bookings")
     void shouldReturnAllBookingsOfOwner() throws Exception {
-        final UserForBookingDto testBooker = UserForBookingDto.builder()
+        final UserBookingDto testBooker = UserBookingDto.builder()
                 .id(1L)
                 .build();
-        final ItemForBookingDto testItem1 = ItemForBookingDto.builder()
+        final ItemBookingDto testItem1 = ItemBookingDto.builder()
                 .id(1L)
                 .name("Семенова Анна")
                 .build();
-        final BookingForResponseDto testBooking1 = BookingForResponseDto.builder()
+        final BookingResponseDto testBooking1 = BookingResponseDto.builder()
                 .id(1L)
                 .start(LocalDateTime.parse("2023-11-26T20:00:00"))
                 .end(LocalDateTime.parse("2023-11-30T20:00:00"))
@@ -185,11 +188,11 @@ public class BookingControllerTest {
                 .booker(testBooker)
                 .item(testItem1)
                 .build();
-        final ItemForBookingDto testItem2 = ItemForBookingDto.builder()
+        final ItemBookingDto testItem2 = ItemBookingDto.builder()
                 .id(2L)
                 .name("Семенова Анна")
                 .build();
-        final BookingForResponseDto testBooking2 = BookingForResponseDto.builder()
+        final BookingResponseDto testBooking2 = BookingResponseDto.builder()
                 .id(2L)
                 .start(LocalDateTime.parse("2023-11-30T20:00:00"))
                 .end(LocalDateTime.parse("2023-12-02T20:00:00"))
@@ -197,7 +200,7 @@ public class BookingControllerTest {
                 .booker(testBooker)
                 .item(testItem2)
                 .build();
-        final List<BookingForResponseDto> testBookings = List.of(testBooking1, testBooking2);
+        final List<BookingResponseDto> testBookings = List.of(testBooking1, testBooking2);
 
         Mockito.when(bookingService.findAllBookingsByOwnerId(1L, "ALL", 0, 20))
                 .thenReturn(testBookings);
@@ -214,19 +217,19 @@ public class BookingControllerTest {
     @DisplayName("POST /bookings returns HTTP-response with status code 200, content type application/json and " +
             "correct created booking")
     void shouldCreateNewBooking() throws Exception {
-        final BookingForRequestDto bookingDto = BookingForRequestDto.builder()
+        final BookingCreateDto bookingDto = BookingCreateDto.builder()
                 .itemId(1L)
                 .start(LocalDateTime.parse("2023-12-30T20:00:00"))
                 .end(LocalDateTime.parse("2024-01-02T20:00:00"))
                 .build();
-        final UserForBookingDto testBooker = UserForBookingDto.builder()
+        final UserBookingDto testBooker = UserBookingDto.builder()
                 .id(1L)
                 .build();
-        final ItemForBookingDto testItem = ItemForBookingDto.builder()
+        final ItemBookingDto testItem = ItemBookingDto.builder()
                 .id(1L)
                 .name("Семенова Анна")
                 .build();
-        final BookingForResponseDto testBooking = BookingForResponseDto.builder()
+        final BookingResponseDto testBooking = BookingResponseDto.builder()
                 .id(1L)
                 .start(LocalDateTime.parse("2023-11-30T20:00:00"))
                 .end(LocalDateTime.parse("2023-12-02T20:00:00"))
@@ -250,7 +253,7 @@ public class BookingControllerTest {
     @DisplayName("POST /bookings returns HTTP-response with status code 400, content type application/json and " +
             "error massage, when start or end date is wrong")
     void shouldNotCreateNewBookingWithWrongDates() throws Exception {
-        final BookingForRequestDto bookingDto1 = BookingForRequestDto.builder()
+        final BookingCreateDto bookingDto1 = BookingCreateDto.builder()
                 .itemId(1L)
                 .start(LocalDateTime.parse("2023-11-30T20:00:00"))
                 .end(LocalDateTime.parse("2023-12-02T20:00:00"))
@@ -267,7 +270,7 @@ public class BookingControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(errorResponse1)));
 
-        final BookingForRequestDto bookingDto2 = BookingForRequestDto.builder()
+        final BookingCreateDto bookingDto2 = BookingCreateDto.builder()
                 .itemId(1L)
                 .start(LocalDateTime.parse("2024-12-12T20:00:00"))
                 .end(LocalDateTime.parse("2024-12-02T20:00:00"))
@@ -292,7 +295,7 @@ public class BookingControllerTest {
     @DisplayName("POST /bookings returns HTTP-response with status code 400, content type application/json and " +
             "error massage, when item is not available")
     void shouldNotCreateNewBookingWithUnavailableItem() throws Exception {
-        final BookingForRequestDto bookingDto = BookingForRequestDto.builder()
+        final BookingCreateDto bookingDto = BookingCreateDto.builder()
                 .itemId(2L)
                 .start(LocalDateTime.parse("2023-12-12T20:00:00"))
                 .end(LocalDateTime.parse("2023-12-22T20:00:00"))
@@ -315,7 +318,7 @@ public class BookingControllerTest {
     @DisplayName("POST /bookings returns HTTP-response with status code 404, content type application/json and " +
             "error massage, when item belongs user")
     void shouldNotCreateNewBookingWithItemBelongsUser() throws Exception {
-        final BookingForRequestDto bookingDto = BookingForRequestDto.builder()
+        final BookingCreateDto bookingDto = BookingCreateDto.builder()
                 .itemId(2L)
                 .start(LocalDateTime.parse("2023-12-12T20:00:00"))
                 .end(LocalDateTime.parse("2023-12-22T20:00:00"))
@@ -338,14 +341,14 @@ public class BookingControllerTest {
     @DisplayName("PATH /bookings/{id} returns HTTP-response with status code 200, content type application/json and " +
             "correct booking with updated status")
     void shouldUpdateBookingStatus() throws Exception {
-        final UserForBookingDto testBooker = UserForBookingDto.builder()
+        final UserBookingDto testBooker = UserBookingDto.builder()
                 .id(1L)
                 .build();
-        final ItemForBookingDto testItem = ItemForBookingDto.builder()
+        final ItemBookingDto testItem = ItemBookingDto.builder()
                 .id(1L)
                 .name("Семенова Анна")
                 .build();
-        final BookingForResponseDto testBooking = BookingForResponseDto.builder()
+        final BookingResponseDto testBooking = BookingResponseDto.builder()
                 .id(1L)
                 .start(LocalDateTime.parse("2023-11-30T20:00:00"))
                 .end(LocalDateTime.parse("2023-12-02T20:00:00"))

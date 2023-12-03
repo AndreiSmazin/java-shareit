@@ -10,13 +10,19 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.exception.IdNotFoundException;
-import ru.practicum.shareit.item.ItemMapper;
-import ru.practicum.shareit.item.ItemMapperImpl;
-import ru.practicum.shareit.item.ItemRepository;
-import ru.practicum.shareit.request.dto.ItemRequestDto;
-import ru.practicum.shareit.request.dto.ItemRequestForResponseDto;
-import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserService;
+import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.mapper.ItemMapperImpl;
+import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.dto.ItemRequestCreateDto;
+import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
+import ru.practicum.shareit.request.entity.ItemRequest;
+import ru.practicum.shareit.request.mapper.ItemRequestMapper;
+import ru.practicum.shareit.request.mapper.ItemRequestMapperImpl;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
+import ru.practicum.shareit.request.service.ItemRequestService;
+import ru.practicum.shareit.request.service.ItemRequestServiceDbImpl;
+import ru.practicum.shareit.user.entity.User;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -83,12 +89,12 @@ public class ItemRequestServiceTest {
     @DisplayName("Method createNewItemRequest(long userId, ItemRequestDto itemRequestDto) should return correct" +
             " created ItemRequest")
     void shouldCreateItemRequest() throws Exception {
-        ItemRequestForResponseDto expectedRequest = ItemRequestForResponseDto.builder()
+        ItemRequestResponseDto expectedRequest = ItemRequestResponseDto.builder()
                 .id(1L)
                 .description("Нужно осветительное оборудование для съемки клипа")
                 .created(LocalDateTime.parse("2023-08-01T00:00:00"))
                 .build();
-        final ItemRequestDto requestDto = ItemRequestDto.builder()
+        final ItemRequestCreateDto requestDto = ItemRequestCreateDto.builder()
                 .description("Нужно осветительное оборудование для съемки клипа")
                 .build();
 
@@ -107,7 +113,7 @@ public class ItemRequestServiceTest {
                 .build();
         Mockito.when(itemRequestRepository.save(ArgumentMatchers.any(ItemRequest.class))).thenReturn(returnedRequest);
 
-        final ItemRequestForResponseDto createdRequest = itemRequestService.createNewItemRequest(3L, requestDto);
+        final ItemRequestResponseDto createdRequest = itemRequestService.createNewItemRequest(3L, requestDto);
 
         assertEquals(expectedRequest, createdRequest, "createdRequest and expectedRequest is not match");
     }
@@ -138,7 +144,7 @@ public class ItemRequestServiceTest {
         Assertions.assertEquals(expectedMessage, findAllItemRequestsException.getMessage(), "Exception massage and" +
                 " expectedMassage is not match");
 
-        final ItemRequestDto requestDto = ItemRequestDto.builder()
+        final ItemRequestCreateDto requestDto = ItemRequestCreateDto.builder()
                 .description("Нужно осветительное оборудование для съемки клипа")
                 .build();
         final Exception createNewItemRequestException = Assertions.assertThrows(IdNotFoundException.class, () ->

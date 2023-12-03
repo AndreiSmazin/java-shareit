@@ -16,9 +16,11 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.practicum.shareit.exception.ExceptionViolation;
 import ru.practicum.shareit.exception.IdNotFoundException;
 import ru.practicum.shareit.exception.ValidationViolation;
-import ru.practicum.shareit.request.dto.ExtendedItemRequestForResponseDto;
-import ru.practicum.shareit.request.dto.ItemRequestDto;
-import ru.practicum.shareit.request.dto.ItemRequestForResponseDto;
+import ru.practicum.shareit.request.controller.ItemRequestController;
+import ru.practicum.shareit.request.dto.ItemRequestCreateDto;
+import ru.practicum.shareit.request.dto.ItemRequestExtendedResponseDto;
+import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
+import ru.practicum.shareit.request.service.ItemRequestService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -37,19 +39,19 @@ public class ItemRequestControllerTest {
     @DisplayName("GET /requests returns HTTP-response with status code 200, content type application/json and " +
             "correct list of requests")
     void shouldReturnRequestsOfUser() throws Exception {
-        final ExtendedItemRequestForResponseDto testItemRequest1 = ExtendedItemRequestForResponseDto.builder()
+        final ItemRequestExtendedResponseDto testItemRequest1 = ItemRequestExtendedResponseDto.builder()
                 .id(1L)
                 .description("Нужна бетономешалка на стройку загородного дома")
                 .created(LocalDateTime.parse("2023-11-26T20:00:00"))
                 .items(new ArrayList<>())
                 .build();
-        final ExtendedItemRequestForResponseDto testItemRequest2 = ExtendedItemRequestForResponseDto.builder()
+        final ItemRequestExtendedResponseDto testItemRequest2 = ItemRequestExtendedResponseDto.builder()
                 .id(2L)
                 .description("Возьму в аренду прицеп для автомобиля с тентом")
                 .created(LocalDateTime.parse("2023-11-30T20:00:00"))
                 .items(new ArrayList<>())
                 .build();
-        final List<ExtendedItemRequestForResponseDto> testItemRequests = List.of(testItemRequest1, testItemRequest2);
+        final List<ItemRequestExtendedResponseDto> testItemRequests = List.of(testItemRequest1, testItemRequest2);
 
         Mockito.when(itemRequestService.findItemRequestsByUserId(1L)).thenReturn(testItemRequests);
 
@@ -80,19 +82,19 @@ public class ItemRequestControllerTest {
     @DisplayName("GET /requests/all returns HTTP-response with status code 200, content type application/json and " +
             "correct list of requests")
     void shouldReturnAllRequests() throws Exception {
-        final ExtendedItemRequestForResponseDto testItemRequest1 = ExtendedItemRequestForResponseDto.builder()
+        final ItemRequestExtendedResponseDto testItemRequest1 = ItemRequestExtendedResponseDto.builder()
                 .id(1L)
                 .description("Нужна бетономешалка на стройку загородного дома")
                 .created(LocalDateTime.parse("2023-11-26T20:00:00"))
                 .items(new ArrayList<>())
                 .build();
-        final ExtendedItemRequestForResponseDto testItemRequest2 = ExtendedItemRequestForResponseDto.builder()
+        final ItemRequestExtendedResponseDto testItemRequest2 = ItemRequestExtendedResponseDto.builder()
                 .id(2L)
                 .description("Возьму в аренду прицеп для автомобиля с тентом")
                 .created(LocalDateTime.parse("2023-11-30T20:00:00"))
                 .items(new ArrayList<>())
                 .build();
-        final List<ExtendedItemRequestForResponseDto> testItemRequests = List.of(testItemRequest1, testItemRequest2);
+        final List<ItemRequestExtendedResponseDto> testItemRequests = List.of(testItemRequest1, testItemRequest2);
 
         Mockito.when(itemRequestService.findAllItemRequests(1L, 0, 20)).thenReturn(testItemRequests);
 
@@ -107,7 +109,7 @@ public class ItemRequestControllerTest {
     @DisplayName("GET /requests/{id} returns HTTP-response with status code 200, content type application/json and " +
             "correct request")
     void shouldReturnRequest() throws Exception {
-        final ExtendedItemRequestForResponseDto testItemRequest = ExtendedItemRequestForResponseDto.builder()
+        final ItemRequestExtendedResponseDto testItemRequest = ItemRequestExtendedResponseDto.builder()
                 .id(1L)
                 .description("Нужна бетономешалка на стройку загородного дома")
                 .created(LocalDateTime.parse("2023-11-26T20:00:00"))
@@ -143,21 +145,21 @@ public class ItemRequestControllerTest {
     @DisplayName("POST /requests returns HTTP-response with status code 200, content type application/json and " +
             "correct created request")
     void shouldCreateRequest() throws Exception {
-        final ItemRequestDto itemRequestDto = ItemRequestDto.builder()
+        final ItemRequestCreateDto itemRequestCreateDto = ItemRequestCreateDto.builder()
                 .description("Нужна бетономешалка на стройку загородного дома")
                 .build();
-        final ItemRequestForResponseDto testItemRequest = ItemRequestForResponseDto.builder()
+        final ItemRequestResponseDto testItemRequest = ItemRequestResponseDto.builder()
                 .id(1L)
                 .description("Нужна бетономешалка на стройку загородного дома")
                 .created(LocalDateTime.parse("2023-11-26T20:00:00"))
                 .build();
 
-        Mockito.when(itemRequestService.createNewItemRequest(1L, itemRequestDto)).thenReturn(testItemRequest);
+        Mockito.when(itemRequestService.createNewItemRequest(1L, itemRequestCreateDto)).thenReturn(testItemRequest);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/requests")
                         .header("X-Sharer-User-Id", 1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(itemRequestDto)))
+                        .content(objectMapper.writeValueAsString(itemRequestCreateDto)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(testItemRequest)));
@@ -167,7 +169,7 @@ public class ItemRequestControllerTest {
     @DisplayName("POST /requests returns HTTP-response with status code 400, content type application/json and " +
             "error massage, when description is blank")
     void shouldNotCreateRequestWithDescriptionIsBlank() throws Exception {
-        final ItemRequestDto itemRequestDto = ItemRequestDto.builder()
+        final ItemRequestCreateDto itemRequestCreateDto = ItemRequestCreateDto.builder()
                 .description(" ")
                 .build();
         final List<ValidationViolation> errorResponse = List.of(
@@ -176,7 +178,7 @@ public class ItemRequestControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.post("/requests")
                         .header("X-Sharer-User-Id", 1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(itemRequestDto)))
+                        .content(objectMapper.writeValueAsString(itemRequestCreateDto)))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(errorResponse)));

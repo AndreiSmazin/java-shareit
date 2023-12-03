@@ -17,11 +17,10 @@ import ru.practicum.shareit.exception.AccessNotAllowedException;
 import ru.practicum.shareit.exception.ExceptionViolation;
 import ru.practicum.shareit.exception.IdNotFoundException;
 import ru.practicum.shareit.exception.ValidationViolation;
-import ru.practicum.shareit.item.dto.CommentForRequestDto;
-import ru.practicum.shareit.item.dto.CommentForResponseDto;
-import ru.practicum.shareit.item.dto.ExtendedItemForResponseDto;
-import ru.practicum.shareit.item.dto.ItemForRequestDto;
-import ru.practicum.shareit.item.dto.ItemForResponseDto;
+import ru.practicum.shareit.item.controller.ItemController;
+import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.dto.CommentCreateDto;
+import ru.practicum.shareit.item.service.ItemService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,7 +38,7 @@ public class ItemControllerTest {
     @DisplayName("GET /items/{id} returns HTTP-response with status code 200, content type application/json and " +
             "correct item")
     void shouldReturnItem() throws Exception {
-        final ExtendedItemForResponseDto testItem = ExtendedItemForResponseDto.builder()
+        final ItemExtendedResponseDto testItem = ItemExtendedResponseDto.builder()
                 .id(1L)
                 .name("Дрель ударная Bosh")
                 .description("Мощность 7000W")
@@ -88,7 +87,7 @@ public class ItemControllerTest {
     @DisplayName("GET /items returns HTTP-response with status code 200, content type application/json and correct " +
             "list of items")
     void shouldReturnAllItems() throws Exception {
-        final ExtendedItemForResponseDto testItem1 = ExtendedItemForResponseDto.builder()
+        final ItemExtendedResponseDto testItem1 = ItemExtendedResponseDto.builder()
                 .id(1L)
                 .name("Дрель ударная Bosh")
                 .description("Мощность 7000W")
@@ -97,7 +96,7 @@ public class ItemControllerTest {
                 .nextBooking(null)
                 .comments(null)
                 .build();
-        final ExtendedItemForResponseDto testItem2 = ExtendedItemForResponseDto.builder()
+        final ItemExtendedResponseDto testItem2 = ItemExtendedResponseDto.builder()
                 .id(2L)
                 .name("Байдарка трёхместная Ладога")
                 .description("2003г.в. в отличном состоянии, весла отсутствуют")
@@ -106,7 +105,7 @@ public class ItemControllerTest {
                 .nextBooking(null)
                 .comments(null)
                 .build();
-        final List<ExtendedItemForResponseDto> testItems = List.of(testItem1, testItem2);
+        final List<ItemExtendedResponseDto> testItems = List.of(testItem1, testItem2);
 
         Mockito.when(itemService.findAllItems(1L, 0, 30)).thenReturn(testItems);
 
@@ -136,21 +135,21 @@ public class ItemControllerTest {
     @DisplayName("GET /items/search?text={text} returns HTTP-response with status code 200, content type " +
             "application/json and correct searched items")
     void shouldReturnSearchedItems() throws Exception {
-        final ItemForResponseDto testItem1 = ItemForResponseDto.builder()
+        final ItemResponseDto testItem1 = ItemResponseDto.builder()
                 .id(1L)
                 .name("Дрель ударная Bosh")
                 .description("Мощность 7000W")
                 .available(true)
                 .requestId(null)
                 .build();
-        final ItemForResponseDto testItem2 = ItemForResponseDto.builder()
+        final ItemResponseDto testItem2 = ItemResponseDto.builder()
                 .id(3L)
                 .name("Дрель аккумуляторная")
                 .description("В комплекте запасной аккумулятор и набор бит")
                 .available(true)
                 .requestId(null)
                 .build();
-        final List<ItemForResponseDto> testItems = List.of(testItem1, testItem2);
+        final List<ItemResponseDto> testItems = List.of(testItem1, testItem2);
 
         Mockito.when(itemService.searchItem(1L, "Дрель", 0, 20)).thenReturn(testItems);
 
@@ -165,13 +164,13 @@ public class ItemControllerTest {
     @DisplayName("POST /items returns HTTP-response with status code 200, content type application/json and correct " +
             "created item")
     void shouldCreateNewItem() throws Exception {
-        final ItemForRequestDto itemDto = ItemForRequestDto.builder()
+        final ItemCreateUpdateDto itemDto = ItemCreateUpdateDto.builder()
                 .name("Дрель ударная Bosh")
                 .description("Мощность 7000W")
                 .available(true)
                 .requestId(1L)
                 .build();
-        final ItemForResponseDto testItem = ItemForResponseDto.builder()
+        final ItemResponseDto testItem = ItemResponseDto.builder()
                 .id(1L)
                 .name("Дрель ударная Bosh")
                 .description("Мощность 7000W")
@@ -195,7 +194,7 @@ public class ItemControllerTest {
     @DisplayName("POST /items returns HTTP-response with status code 400, content type application/json and " +
             "validation error massage, when input item`s fields is null")
     void shouldNotCreateItemWithNullFields() throws Exception {
-        final ItemForRequestDto incorrectItemDto = ItemForRequestDto.builder()
+        final ItemCreateUpdateDto incorrectItemDto = ItemCreateUpdateDto.builder()
                 .name(null)
                 .description(null)
                 .available(null)
@@ -219,13 +218,13 @@ public class ItemControllerTest {
     @DisplayName("PATCH /items/{id} returns HTTP-response with status code 200, content type application/json and " +
             "correct changed item")
     void shouldUpdateUser() throws Exception {
-        final ItemForRequestDto itemDto = ItemForRequestDto.builder()
+        final ItemCreateUpdateDto itemDto = ItemCreateUpdateDto.builder()
                 .name("Дрель ударная Bosh")
                 .description("Мощность 7000W")
                 .available(true)
                 .requestId(null)
                 .build();
-        final ItemForResponseDto testItem = ItemForResponseDto.builder()
+        final ItemResponseDto testItem = ItemResponseDto.builder()
                 .id(1L)
                 .name("Дрель ударная Bosh")
                 .description("Мощность 7000W")
@@ -249,7 +248,7 @@ public class ItemControllerTest {
     @DisplayName("PATCH /items/{id} returns HTTP-response with status code 404, content type application/json and " +
             "error message, when user does not access to item")
     void shouldNotUpdateItemWithoutAccess() throws Exception {
-        final ItemForRequestDto itemDto = ItemForRequestDto.builder()
+        final ItemCreateUpdateDto itemDto = ItemCreateUpdateDto.builder()
                 .name("Дрель ударная Bosh")
                 .description("Мощность 7000W")
                 .available(true)
@@ -273,10 +272,10 @@ public class ItemControllerTest {
     @DisplayName("POST /items/{id}/comment returns HTTP-response with status code 200, content type application/json" +
             " and correct created comment")
     void shouldCreateNewComment() throws Exception {
-        final CommentForRequestDto commentDto = CommentForRequestDto.builder()
+        final CommentCreateDto commentDto = CommentCreateDto.builder()
                 .text("Отличная дрель, без проблем просверлила монолитный бетон")
                 .build();
-        final CommentForResponseDto testComment = CommentForResponseDto.builder()
+        final CommentResponseDto testComment = CommentResponseDto.builder()
                 .id(1L)
                 .text("Отличная дрель, без проблем просверлила монолитный бетон")
                 .authorName("Василий Михайлов")
@@ -298,7 +297,7 @@ public class ItemControllerTest {
     @DisplayName("POST /items/{id}/comment returns HTTP-response with status code 400, content type application/json" +
             " and validation error massage, when input comment`s text field is null")
     void shouldNotCreateNewCommentWithNullText() throws Exception {
-        final CommentForRequestDto commentDto = CommentForRequestDto.builder()
+        final CommentCreateDto commentDto = CommentCreateDto.builder()
                 .text(null)
                 .build();
         final List<ValidationViolation> errorResponse = List.of(

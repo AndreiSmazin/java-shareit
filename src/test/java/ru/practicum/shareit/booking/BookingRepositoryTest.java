@@ -4,7 +4,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import ru.practicum.shareit.booking.dto.BookingForItemDto;
+import ru.practicum.shareit.booking.dto.BookingItemDto;
+import ru.practicum.shareit.booking.entity.Booking;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,7 +48,7 @@ public class BookingRepositoryTest {
         final List<Long> expectedBookingsIds = List.of(1L, 2L);
 
         final List<Long> bookingsIds = bookingRepository.findPastBookingsOfItem(3L).stream()
-                .map(BookingForItemDto::getId)
+                .map(BookingItemDto::getId)
                 .collect(Collectors.toList());
 
         assertEquals(expectedBookingsIds, bookingsIds, "BookingsIds and expectedBookingsIds is not match");
@@ -58,7 +60,7 @@ public class BookingRepositoryTest {
         final List<Long> expectedBookingsIds = List.of(3L, 4L);
 
         final List<Long> bookingsIds = bookingRepository.findFutureBookingsOfItem(3L).stream()
-                .map(BookingForItemDto::getId)
+                .map(BookingItemDto::getId)
                 .collect(Collectors.toList());
 
         assertEquals(expectedBookingsIds, bookingsIds, "BookingsIds and expectedBookingsIds is not match");
