@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,8 +19,6 @@ import ru.practicum.shareit.user.UserService;
 
 import java.util.List;
 import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ItemServiceTest {
@@ -48,7 +47,7 @@ public class ItemServiceTest {
 
     @Test
     @DisplayName("Method checkItem(long id) should return correct Item")
-    void shouldReturnUser() throws Exception {
+    void shouldReturnItem() throws Exception {
         final User testUser = User.builder()
                 .id(3L)
                 .name("Сергей Иванов")
@@ -67,20 +66,20 @@ public class ItemServiceTest {
 
         final Item item = itemService.checkItem(12L);
 
-        assertEquals(expectedItem, item, "Item and expectedItem is not match");
+        Assertions.assertEquals(expectedItem, item, "Item and expectedItem is not match");
     }
 
     @Test
     @DisplayName("Method checkItem(long id) should throw IdNotFoundException when Item is not found")
-    void shouldThrowExceptionWhenUserNotFound() throws Exception {
+    void shouldThrowExceptionWhenItemNotFound() throws Exception {
         final String expectedMessage = "Item with id 100 not exist";
 
         Mockito.when(itemRepository.findById(100L)).thenReturn(Optional.empty());
 
-        final Exception e = assertThrows(IdNotFoundException.class, () ->
+        final Exception e = Assertions.assertThrows(IdNotFoundException.class, () ->
                 itemService.checkItem(100L));
 
-        assertEquals(expectedMessage, e.getMessage(), "Exception massage and expectedMassage is not match");
+        Assertions.assertEquals(expectedMessage, e.getMessage(), "Exception massage and expectedMassage is not match");
     }
 
     @Test
@@ -122,7 +121,7 @@ public class ItemServiceTest {
 
         final ItemForResponseDto createdItem = itemService.createNewItem(3L, itemDto);
 
-        assertEquals(expectedItem, createdItem, "CreatedItem and expectedItem is not match");
+        Assertions.assertEquals(expectedItem, createdItem, "CreatedItem and expectedItem is not match");
     }
 
     @Test
@@ -133,6 +132,6 @@ public class ItemServiceTest {
 
         final List<ItemForResponseDto> items = itemService.searchItem(3L, "", 0, 20);
 
-        assertTrue(items.isEmpty(), "Items list is not empty");
+        Assertions.assertTrue(items.isEmpty(), "Items list is not empty");
     }
 }

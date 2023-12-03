@@ -46,7 +46,7 @@ public class BookingServiceTest {
 
     @Test
     @DisplayName("Method checkBooking(long id) should return correct Booking")
-    void shouldReturnUser() throws Exception {
+    void shouldReturnBooking() throws Exception {
         final Booking expectedBooking = Booking.builder()
                 .id(1L)
                 .start(LocalDateTime.parse("2023-08-01T00:00:00"))
@@ -65,7 +65,7 @@ public class BookingServiceTest {
 
     @Test
     @DisplayName("Method checkBooking(long id) should throw IdNotFoundException when Booking is not found")
-    void shouldThrowExceptionWhenUserNotFound() throws Exception {
+    void shouldThrowExceptionWhenBookingNotFound() throws Exception {
         final String expectedMessage = "Booking with id 100 not exist";
 
         Mockito.when(bookingRepository.findById(100L)).thenReturn(Optional.empty());
