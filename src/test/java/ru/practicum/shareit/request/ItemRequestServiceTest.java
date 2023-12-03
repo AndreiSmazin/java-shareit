@@ -99,14 +99,14 @@ public class ItemRequestServiceTest {
         Mockito.when(userService.checkUser(3L)).thenReturn(testUser);
 
         ItemRequest returnedRequest = ItemRequest.builder()
-                .id(1)
+                .id(1L)
                 .description("Нужно осветительное оборудование для съемки клипа")
                 .requester(testUser)
                 .created(LocalDateTime.parse("2023-08-01T00:00:00"))
                 .build();
         Mockito.when(itemRequestRepository.save(ArgumentMatchers.any(ItemRequest.class))).thenReturn(returnedRequest);
 
-        final ItemRequestForResponseDto createdRequest = itemRequestService.createNewItemRequest(3l, requestDto);
+        final ItemRequestForResponseDto createdRequest = itemRequestService.createNewItemRequest(3L, requestDto);
 
         assertEquals(expectedRequest, createdRequest, "createdRequest and expectedRequest is not match");
     }
