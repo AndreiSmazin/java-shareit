@@ -17,6 +17,7 @@
 
 	<properties>
 		<java.version>11</java.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<dependencies>
@@ -173,6 +174,16 @@
 					<version>0.8.8</version>
 					<configuration>
 						<output>file</output>
+						<excludes>
+							<exclude>ru/practicum/shareit/booking/entity/Booking.class</exclude>
+							<exclude>ru/practicum/shareit/exception/AccessNotAllowedException.class</exclude>
+							<exclude>ru/practicum/shareit/exception/RequestValidationException.class</exclude>
+							<exclude>ru/practicum/shareit/exception/IdNotFoundException.class</exclude>
+							<exclude>ru/practicum/shareit/item/entity/Comment.class</exclude>
+							<exclude>ru/practicum/shareit/item/entity/Item.class</exclude>
+							<exclude>ru/practicum/shareit/request/entity/ItemRequest.class</exclude>
+							<exclude>ru/practicum/shareit/user/entity/User.class</exclude>
+						</excludes>
 					</configuration>
 					<executions>
 						<execution>
@@ -267,6 +278,13 @@
 			<id>coverage</id>
 			<build>
 				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<configuration>
+							<encoding>UTF-8</encoding>
+						</configuration>
+					</plugin>
 					<plugin>
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
