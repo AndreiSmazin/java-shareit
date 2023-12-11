@@ -155,21 +155,6 @@ public class BookingControllerTest {
     }
 
     @Test
-    @DisplayName("GET /bookings returns HTTP-response with status code 400, content type application/json and " +
-            "error massage, when request params is wrong")
-    void shouldNotReturnAllBookingsOfUserWithWrongRequestParams() throws Exception {
-        final List<ValidationViolation> errorResponse = List.of(
-                new ValidationViolation("from", "must be greater than or equal to 0"),
-                new ValidationViolation("size", "must be less than or equal to 100"));
-
-        mockMvc.perform(MockMvcRequestBuilders.get("/bookings?state=CURRENT&from=-1&size=250")
-                        .header("X-Sharer-User-Id", 1))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(errorResponse)));
-    }
-
-    @Test
     @DisplayName("GET /bookings returns HTTP-response with status code 200, content type application/json and " +
             "correct list of bookings")
     void shouldReturnAllBookingsOfOwner() throws Exception {
@@ -247,48 +232,6 @@ public class BookingControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(testBooking)));
-    }
-
-    @Test
-    @DisplayName("POST /bookings returns HTTP-response with status code 400, content type application/json and " +
-            "error massage, when start or end date is wrong")
-    void shouldNotCreateNewBookingWithWrongDates() throws Exception {
-        final BookingCreateDto bookingDto1 = BookingCreateDto.builder()
-                .itemId(1L)
-                .start(LocalDateTime.parse("2023-11-30T20:00:00"))
-                .end(LocalDateTime.parse("2023-12-02T20:00:00"))
-                .build();
-        final List<ValidationViolation> errorResponse1 = List.of(
-                new ValidationViolation("start", "must be a date in the present or in the future"),
-                new ValidationViolation("end", "must be a date in the present or in the future"));
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/bookings")
-                        .header("X-Sharer-User-Id", 1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(bookingDto1)))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(errorResponse1)));
-
-        final BookingCreateDto bookingDto2 = BookingCreateDto.builder()
-                .itemId(1L)
-                .start(LocalDateTime.parse("2024-12-12T20:00:00"))
-                .end(LocalDateTime.parse("2024-12-02T20:00:00"))
-                .build();
-        final ExceptionViolation errorResponse2 = new ExceptionViolation("End booking date 2024-12-02T20:00:00" +
-                " can`t be earlier than start date 2024-12-12T20:00:00");
-
-        Mockito.when(bookingService.createNewBooking(1L, bookingDto2)).thenThrow(
-                new RequestValidationException("End booking date 2024-12-02T20:00:00 can`t be earlier than start date" +
-                        " 2024-12-12T20:00:00"));
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/bookings")
-                        .header("X-Sharer-User-Id", 1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(bookingDto2)))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(errorResponse2)));
     }
 
     @Test

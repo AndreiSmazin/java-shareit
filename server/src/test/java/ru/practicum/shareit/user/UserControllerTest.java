@@ -110,46 +110,6 @@ public class UserControllerTest {
     }
 
     @Test
-    @DisplayName("POST /users returns HTTP-response with status code 400, content type application/json and " +
-            "validation error massage, when input user`s fields is incorrect")
-    void shouldNotCreateUserWithIncorrectFields() throws Exception {
-        final UserCreateUpdateDto incorrectUserCreateUpdateDto = UserCreateUpdateDto.builder()
-                .name(" ")
-                .email("IvanovIvanIvanovich")
-                .build();
-        final List<ValidationViolation> errorResponse = List.of(
-                new ValidationViolation("name", "must not be blank"),
-                new ValidationViolation("email", "must be a well-formed email address"));
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(incorrectUserCreateUpdateDto)))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(errorResponse)));
-    }
-
-    @Test
-    @DisplayName("POST /users returns HTTP-response with status code 400, content type application/json and " +
-            "validation error massage, when input user`s fields is null")
-    void shouldNotCreateUserWithNullFields() throws Exception {
-        final UserCreateUpdateDto incorrectUserCreateUpdateDto = UserCreateUpdateDto.builder()
-                .name(null)
-                .email(null)
-                .build();
-        final List<ValidationViolation> errorResponse = List.of(
-                new ValidationViolation("name", "must not be blank"),
-                new ValidationViolation("email", "must not be null"));
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(incorrectUserCreateUpdateDto)))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(errorResponse)));
-    }
-
-    @Test
     @DisplayName("PATCH /users/{id} returns HTTP-response with status code 200, content type application/json and " +
             "correct changed user")
     void shouldUpdateUser() throws Exception {

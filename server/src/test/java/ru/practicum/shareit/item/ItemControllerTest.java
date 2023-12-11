@@ -117,21 +117,6 @@ public class ItemControllerTest {
     }
 
     @Test
-    @DisplayName("GET /items returns HTTP-response with status code 400, content type application/json and " +
-            "error massage, when request params is wrong")
-    void shouldNotReturnAllItemsWithWrongRequestParams() throws Exception {
-        final List<ValidationViolation> errorResponse = List.of(
-                new ValidationViolation("from", "must be greater than or equal to 0"),
-                new ValidationViolation("size", "must be less than or equal to 100"));
-
-        mockMvc.perform(MockMvcRequestBuilders.get("/items?from=-1&size=250")
-                        .header("X-Sharer-User-Id", 1))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(errorResponse)));
-    }
-
-    @Test
     @DisplayName("GET /items/search?text={text} returns HTTP-response with status code 200, content type " +
             "application/json and correct searched items")
     void shouldReturnSearchedItems() throws Exception {
@@ -188,30 +173,6 @@ public class ItemControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content()
                         .json(objectMapper.writeValueAsString(testItem)));
-    }
-
-    @Test
-    @DisplayName("POST /items returns HTTP-response with status code 400, content type application/json and " +
-            "validation error massage, when input item`s fields is null")
-    void shouldNotCreateItemWithNullFields() throws Exception {
-        final ItemCreateUpdateDto incorrectItemDto = ItemCreateUpdateDto.builder()
-                .name(null)
-                .description(null)
-                .available(null)
-                .requestId(1L)
-                .build();
-        final List<ValidationViolation> errorResponse = List.of(
-                new ValidationViolation("name", "must not be blank"),
-                new ValidationViolation("description", "must not be blank"),
-                new ValidationViolation("available", "must not be null"));
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/items")
-                        .header("X-Sharer-User-Id", 1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(incorrectItemDto)))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(errorResponse)));
     }
 
     @Test
@@ -291,24 +252,5 @@ public class ItemControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(testComment)));
-    }
-
-    @Test
-    @DisplayName("POST /items/{id}/comment returns HTTP-response with status code 400, content type application/json" +
-            " and validation error massage, when input comment`s text field is null")
-    void shouldNotCreateNewCommentWithNullText() throws Exception {
-        final CommentCreateDto commentDto = CommentCreateDto.builder()
-                .text(null)
-                .build();
-        final List<ValidationViolation> errorResponse = List.of(
-                new ValidationViolation("text", "must not be blank"));
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/items/1/comment")
-                        .header("X-Sharer-User-Id", 1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(commentDto)))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(errorResponse)));
     }
 }

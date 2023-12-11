@@ -40,6 +40,15 @@ public class ErrorHandlingControllerAdvice {
                 .collect(Collectors.toList());
     }
 
+    @ExceptionHandler(Throwable.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    public ExceptionViolation onThrowable(Throwable e) {
+        log.error("Unpredictable error: {}", e.getMessage());
+
+        return new ExceptionViolation(e.getMessage());
+    }
+
     private String getFieldName(ConstraintViolation constraintViolation) {
         String[] propertyPath = constraintViolation.getPropertyPath().toString().split("\\.");
         return propertyPath[propertyPath.length - 1];

@@ -164,23 +164,4 @@ public class ItemRequestControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(testItemRequest)));
     }
-
-    @Test
-    @DisplayName("POST /requests returns HTTP-response with status code 400, content type application/json and " +
-            "error massage, when description is blank")
-    void shouldNotCreateRequestWithDescriptionIsBlank() throws Exception {
-        final ItemRequestCreateDto itemRequestCreateDto = ItemRequestCreateDto.builder()
-                .description(" ")
-                .build();
-        final List<ValidationViolation> errorResponse = List.of(
-                new ValidationViolation("description", "must not be blank"));
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/requests")
-                        .header("X-Sharer-User-Id", 1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(itemRequestCreateDto)))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(errorResponse)));
-    }
 }

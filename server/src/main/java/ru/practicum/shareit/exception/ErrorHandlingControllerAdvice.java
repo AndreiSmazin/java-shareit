@@ -16,30 +16,6 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 @Slf4j
 public class ErrorHandlingControllerAdvice {
-    @ExceptionHandler(ConstraintViolationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ResponseBody
-    public List<ValidationViolation> onConstraintViolationException(ConstraintViolationException e) {
-        e.getConstraintViolations().forEach(error -> log.error("Validation error: incorrect value" +
-                " '{}' of {}, {}", error.getInvalidValue(), getFieldName(error), error.getMessage()));
-
-        return e.getConstraintViolations().stream()
-                .map(error -> new ValidationViolation(getFieldName(error), error.getMessage()))
-                .collect(Collectors.toList());
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ResponseBody
-    public List<ValidationViolation> onMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        e.getBindingResult().getFieldErrors().forEach(error -> log.error("Validation error: incorrect value '{}'" +
-                " of {}, {}", error.getRejectedValue(), error.getObjectName(), error.getDefaultMessage()));
-
-        return e.getBindingResult().getFieldErrors().stream()
-                .map(error -> new ValidationViolation(error.getField(), error.getDefaultMessage()))
-                .collect(Collectors.toList());
-    }
-
     @ExceptionHandler(IdNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
@@ -74,10 +50,5 @@ public class ErrorHandlingControllerAdvice {
         log.error("Unpredictable error: {}", e.getMessage());
 
         return new ExceptionViolation(e.getMessage());
-    }
-
-    private String getFieldName(ConstraintViolation constraintViolation) {
-        String[] propertyPath = constraintViolation.getPropertyPath().toString().split("\\.");
-        return propertyPath[propertyPath.length - 1];
     }
 }
