@@ -52,7 +52,7 @@ public class ItemController {
 
     @PostMapping
     @Validated({Marker.OnCreate.class})
-    public ResponseEntity<Object> create( @RequestHeader("X-Sharer-User-Id") long userId,
+    public ResponseEntity<Object> create(@RequestHeader("X-Sharer-User-Id") long userId,
             @Valid @RequestBody ItemCreateUpdateDto itemDto) {
         log.debug("Received POST-request /items with header X-Sharer-User-Id={} and body: {}", userId, itemDto);
 

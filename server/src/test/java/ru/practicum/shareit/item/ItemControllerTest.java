@@ -16,10 +16,12 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.practicum.shareit.exception.AccessNotAllowedException;
 import ru.practicum.shareit.exception.ExceptionViolation;
 import ru.practicum.shareit.exception.IdNotFoundException;
-import ru.practicum.shareit.exception.ValidationViolation;
 import ru.practicum.shareit.item.controller.ItemController;
-import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.dto.CommentCreateDto;
+import ru.practicum.shareit.item.dto.CommentResponseDto;
+import ru.practicum.shareit.item.dto.ItemCreateUpdateDto;
+import ru.practicum.shareit.item.dto.ItemExtendedResponseDto;
+import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import java.time.LocalDateTime;

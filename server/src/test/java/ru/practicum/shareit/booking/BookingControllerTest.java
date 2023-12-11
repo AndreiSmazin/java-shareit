@@ -22,7 +22,6 @@ import ru.practicum.shareit.exception.AccessNotAllowedException;
 import ru.practicum.shareit.exception.ExceptionViolation;
 import ru.practicum.shareit.exception.IdNotFoundException;
 import ru.practicum.shareit.exception.RequestValidationException;
-import ru.practicum.shareit.exception.ValidationViolation;
 import ru.practicum.shareit.item.dto.ItemBookingDto;
 import ru.practicum.shareit.user.dto.UserBookingDto;
 

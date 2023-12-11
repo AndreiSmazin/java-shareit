@@ -13,7 +13,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.practicum.shareit.exception.ExceptionViolation;
 import ru.practicum.shareit.exception.IdNotFoundException;
-import ru.practicum.shareit.exception.ValidationViolation;
 import ru.practicum.shareit.user.controller.UserController;
 import ru.practicum.shareit.user.dto.UserCreateUpdateDto;
 import ru.practicum.shareit.user.dto.UserResponseDto;
