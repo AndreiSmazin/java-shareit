@@ -17,7 +17,7 @@ services:
     depends_on:
       - server
     environment:
-      - SHAREIT_SERVER_URL=http://server:9090
+      - SHAREIT_SERVER_URL=${SERVER_URL}
     networks:
       - shareit-net
 
@@ -38,9 +38,9 @@ services:
     depends_on:
       - db
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/ShareItDb
-      - SPRING_DATASOURCE_USERNAME=ShareItDbAdmin
-      - SPRING_DATASOURCE_PASSWORD=admin
+      - SPRING_DATASOURCE_URL=${DATASOURCE_URL}
+      - SPRING_DATASOURCE_USERNAME=${DATASOURCE_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DATASOURCE_PASSWORD}
     networks:
       - shareit-net
 
@@ -58,9 +58,9 @@ services:
     ports:
       - "6541:5432"
     environment:
-      - POSTGRES_DB=ShareItDb
-      - POSTGRES_USER=ShareItDbAdmin
-      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     networks:
       - shareit-net
 
