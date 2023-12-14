@@ -89,7 +89,6 @@ public class BookingServiceDbImpl implements BookingService {
         validateAvailable(item);
         booking.setItem(item);
 
-        validateBookingPeriod(bookingDto.getStart(), bookingDto.getEnd());
         booking.setStart(bookingDto.getStart());
         booking.setEnd(bookingDto.getEnd());
 
@@ -112,13 +111,6 @@ public class BookingServiceDbImpl implements BookingService {
         bookingRepository.save(booking);
 
         return bookingMapper.bookingToBookingForResponseDto(booking);
-    }
-
-    private void validateBookingPeriod(LocalDateTime start, LocalDateTime end) {
-        if (!end.isAfter(start)) {
-            throw new RequestValidationException(String.format("End booking date %s can`t be earlier than" +
-                    " start date %s", end, start));
-        }
     }
 
     private void validateAvailable(Item item) {
@@ -156,8 +148,6 @@ public class BookingServiceDbImpl implements BookingService {
 
     private List<Booking> filterBookingsByState(List<Booking> bookings, String state) {
         switch (state) {
-            case "ALL":
-                return bookings;
             case "CURRENT":
                 return bookings.stream()
                         .filter(booking -> booking.getStart().isBefore(LocalDateTime.now()) &&
@@ -180,7 +170,7 @@ public class BookingServiceDbImpl implements BookingService {
                         .filter(booking -> booking.getStatus().equals(BookingStatus.REJECTED))
                         .collect(Collectors.toList());
             default:
-                throw new RequestValidationException(String.format("Unknown state: %s", state));
+                return bookings;
         }
     }
 }

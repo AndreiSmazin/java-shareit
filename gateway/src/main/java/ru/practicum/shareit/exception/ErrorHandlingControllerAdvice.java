@@ -40,6 +40,15 @@ public class ErrorHandlingControllerAdvice {
                 .collect(Collectors.toList());
     }
 
+    @ExceptionHandler(RequestValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ExceptionViolation onRequestValidationException(RequestValidationException e) {
+        log.error("RequestValidationException: {}", e.getMessage());
+
+        return new ExceptionViolation(e.getMessage());
+    }
+
     @ExceptionHandler(Throwable.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody

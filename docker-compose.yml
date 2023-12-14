@@ -3,6 +3,14 @@ services:
   gateway:
     build: gateway
     image: gateway
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
     container_name: shareit-gateway
     ports:
       - "8080:8080"
@@ -10,10 +18,20 @@ services:
       - server
     environment:
       - SHAREIT_SERVER_URL=http://server:9090
+    networks:
+      - shareit-net
 
   server:
     build: server
     image: server
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
     container_name: shareit-server
     ports:
       - "9090:9090"
@@ -23,9 +41,19 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/ShareItDb
       - SPRING_DATASOURCE_USERNAME=ShareItDbAdmin
       - SPRING_DATASOURCE_PASSWORD=admin
+    networks:
+      - shareit-net
 
   db:
     image: postgres:14-alpine
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
     container_name: shareit-db
     ports:
       - "6541:5432"
@@ -33,3 +61,9 @@ services:
       - POSTGRES_DB=ShareItDb
       - POSTGRES_USER=ShareItDbAdmin
       - POSTGRES_PASSWORD=admin
+    networks:
+      - shareit-net
+
+networks:
+  shareit-net:
+    driver: bridge

@@ -238,18 +238,6 @@ public class BookingServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("Method findAllBookingsByUserId(long userId, String state, int from, int size) should throw" +
-            " RequestValidationException when state is unknown")
-    void shouldExceptionWhenStateUnknown() throws Exception {
-        final String expectedMessage = "Unknown state: WTF";
-
-        final Exception e = Assertions.assertThrows(RequestValidationException.class, () ->
-                bookingService.findAllBookingsByUserId(4L, "WTF", 0, 20));
-
-        Assertions.assertEquals(expectedMessage, e.getMessage(), "Exception massage and expectedMassage is not match");
-    }
-
-    @Test
     @DisplayName("Method findAllBookingsByOwnerId(long userId, String state, int from, int size) should return correct" +
             " list of Bookings with ALL state")
     void shouldReturnAllBookingsByOwnerId() throws Exception {

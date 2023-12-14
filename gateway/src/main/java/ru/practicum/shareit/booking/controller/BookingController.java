@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.booking.client.BookingClient;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
+import ru.practicum.shareit.booking.service.BookingValidationService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
@@ -39,6 +40,8 @@ public class BookingController {
                                                    @RequestParam(defaultValue = "0") @Min(0) int from,
                                                    @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size,
                                                    @RequestParam(defaultValue = "ALL") String state) {
+        BookingValidationService.validateState(state);
+
         return bookingClient.getAllBookingsByUserId(userId, state, from, size);
     }
 
@@ -47,6 +50,8 @@ public class BookingController {
                                                     @RequestParam(defaultValue = "0") @Min(0) int from,
                                                     @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size,
                                                     @RequestParam(defaultValue = "ALL") String state) {
+        BookingValidationService.validateState(state);
+
         return bookingClient.getAllBookingsByOwnerId(userId, state, from, size);
     }
 
@@ -54,6 +59,8 @@ public class BookingController {
     public ResponseEntity<Object> create(@RequestHeader("X-Sharer-User-Id") long userId,
                                      @Valid @RequestBody BookingCreateDto bookingDto) {
         log.debug("Received POST-request /bookings with header X-Sharer-User-Id={} and body: {}", userId, bookingDto);
+
+        BookingValidationService.validateBookingPeriod(bookingDto.getStart(), bookingDto.getEnd());
 
         return bookingClient.createNewBooking(userId, bookingDto);
     }

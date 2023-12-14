@@ -228,46 +228,6 @@ public class BookingServiceTest {
     }
 
     @Test
-    @DisplayName("Method createNewBooking(long userId, BookingForRequestDto bookingDto) should throw" +
-            " RequestValidationException when start date later then end date")
-    void shouldThrowExceptionWhenStartLaterThanEnd() throws Exception {
-        final String expectedMessage = "End booking date 2023-08-01T00:00 can`t be earlier than start date" +
-                " 2023-08-10T00:00";
-        final BookingCreateDto bookingDto = BookingCreateDto.builder()
-                .start(LocalDateTime.parse("2023-08-10T00:00:00"))
-                .end(LocalDateTime.parse("2023-08-01T00:00:00"))
-                .itemId(3L)
-                .build();
-
-        final User user = User.builder()
-                .id(4L)
-                .name("Иван Иванов")
-                .email("Ivan1992@mail.ru")
-                .build();
-        Mockito.when(userService.checkUser(4L)).thenReturn(user);
-
-        final User itemOwner = User.builder()
-                .id(5L)
-                .name("Максим Акропович")
-                .email("SuperMax2003@mail.ru")
-                .build();
-        final Item item = Item.builder()
-                .id(3L)
-                .name("Байдарка трёхместная Ладога")
-                .description("Каркасно-надувная, в чехле, весла и насос в комплекте")
-                .owner(itemOwner)
-                .available(true)
-                .requestId(null)
-                .build();
-        Mockito.when(itemService.checkItem(3L)).thenReturn(item);
-
-        final Exception e = assertThrows(RequestValidationException.class, () ->
-                bookingService.createNewBooking(4L, bookingDto));
-
-        assertEquals(expectedMessage, e.getMessage(), "Exception massage and expectedMassage is not match");
-    }
-
-    @Test
     @DisplayName("Methods findBooking, findAllBookingsByUserId, findAllBookingsByOwnerId, createNewBooking and" +
             " updateBookingStatus should throw IdNotFoundException when User is not found")
     void shouldThrowExceptionWhenUserNotExists() throws Exception {
